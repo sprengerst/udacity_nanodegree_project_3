@@ -3,6 +3,7 @@ package com.sam_chordas.android.stockhawk.tasks;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -49,7 +50,7 @@ public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Floa
             // Base URL for the Yahoo query
             urlStringBuilder.append("https://query.yahooapis.com/v1/public/yql?q=");
             urlStringBuilder.append(URLEncoder.encode("select * from yahoo.finance.historicaldata where symbol = "
-                    + " \"" + stockTag + "\" and startDate = \"" + addDays(date, -7) + "\" and endDate = \"" + getDateString(date) + "\"", "UTF-8"));
+                    + " \"" + stockTag + "\" and startDate = \"" + Utils.addDays(date, -7) + "\" and endDate = \"" + Utils.getDateString(date) + "\"", "UTF-8"));
 
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -65,7 +66,6 @@ public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Floa
             try {
                 getResponse = fetchData(urlString);
                 System.out.println("GETRESPONSE: " + getResponse);
-                // TODO fetch data to map
                 return getHistoricDataFromJSON(getResponse);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -114,25 +114,14 @@ public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Floa
             System.out.println("CLOSEVALUE: "+closeValue);
             System.out.println("CLOSEDAATE: "+closeDate);
 
-            resultMap.put(closeDate,Float.parseFloat(closeValue));
+            resultMap.put( Utils.chartFormat(closeDate),Float.parseFloat(closeValue));
         }
 
 
         return resultMap;
     }
 
-    private Date parseDateFormat(String date) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd").parse(date);
-    }
 
-    private String addDays(Date d, int days) {
-        return getDateString(new Date(d.getTime() + (long) days * 1000 * 60 * 60 * 24));
-    }
-
-    private String getDateString(Date d) {
-        SimpleDateFormat yahooDate = new SimpleDateFormat("yyyy-MM-dd");
-        return yahooDate.format(d);
-    }
 }
 
 

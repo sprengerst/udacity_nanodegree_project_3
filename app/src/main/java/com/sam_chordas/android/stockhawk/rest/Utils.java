@@ -12,7 +12,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by sam_chordas on 10/8/15.
@@ -103,5 +106,21 @@ public class Utils {
         Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
     }
 
+    public static Date parseDateFormat(String date) throws ParseException {
+        return new SimpleDateFormat("yyyy-MM-dd").parse(date);
+    }
 
+    public static String addDays(Date d, int days) {
+        return getDateString(new Date(d.getTime() + (long) days * 1000 * 60 * 60 * 24));
+    }
+
+    public static String getDateString(Date d) {
+        SimpleDateFormat yahooDate = new SimpleDateFormat("yyyy-MM-dd");
+        return yahooDate.format(d);
+    }
+
+
+    public static String chartFormat(String closeDate) throws ParseException {
+        return new SimpleDateFormat("MM-dd").format(parseDateFormat(closeDate));
+    }
 }

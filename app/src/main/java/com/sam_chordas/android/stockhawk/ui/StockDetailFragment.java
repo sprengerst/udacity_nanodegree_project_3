@@ -16,8 +16,11 @@ import com.db.chart.model.LineSet;
 import com.db.chart.view.ChartView;
 import com.db.chart.view.LineChartView;
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.tasks.HistoricalDataTask;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -39,17 +42,24 @@ public class StockDetailFragment extends Fragment {
 
         Bundle arguments = getArguments();
         String tag = null;
+        float todayVal = 0;
         if (arguments != null) {
             tag = arguments.getString("TAG");
+            todayVal = arguments.getFloat("TODAYVAL");
         }
 
         View rootView = inflater.inflate(R.layout.stock_detail_fragment, container, false);
         mLineChartView = (LineChartView) rootView.findViewById(R.id.linechartstock);
-
-
+        
         try {
+
             Map<String, Float> chartMap = new HistoricalDataTask(getActivity()).execute(new String[]{tag}).get();
 
+
+            if(!chartMap.containsKey(Utils.chartFormat(Utils.getDateString(new Date()))
+            )){
+                chartMap.put(Utils.chartFormat(Utils.getDateString(new Date())),todayVal);
+            }
 
             float minVal = Float.MAX_VALUE;
             float maxVal = 0;
@@ -82,6 +92,8 @@ public class StockDetailFragment extends Fragment {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
 

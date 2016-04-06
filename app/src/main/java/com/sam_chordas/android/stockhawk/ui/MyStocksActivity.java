@@ -93,7 +93,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                         // TODO start detail Intend
                         System.out.println(((TextView) (v.findViewById(R.id.stock_symbol))).getText());
                         //new HistoricalDataTask(mContext).execute(new String[]{((TextView) (v.findViewById(R.id.stock_symbol))).getText().toString()});
-                        Intent intent = new Intent(mContext, StockDetailActivity.class).putExtra("TAG",((TextView)(v.findViewById(R.id.stock_symbol))).getText());
+                        Intent intent = new Intent(mContext, StockDetailActivity.class).putExtra("TAG",((TextView)(v.findViewById(R.id.stock_symbol))).getText()).putExtra("TODAYVAL",((TextView)(v.findViewById(R.id.bid_price))).getText());
                         startActivity(intent);
                     }
                 }));
