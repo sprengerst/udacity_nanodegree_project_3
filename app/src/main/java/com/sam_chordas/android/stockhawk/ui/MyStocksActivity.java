@@ -38,7 +38,6 @@ import com.sam_chordas.android.stockhawk.rest.RecyclerViewItemClickListener;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
-import com.sam_chordas.android.stockhawk.tasks.HistoricalDataTask;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
 
 public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -91,9 +90,11 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View v, int position) {
-                        // TODO start detail Inted
-                        System.out.println(((TextView)(v.findViewById(R.id.stock_symbol))).getText());
-                        new HistoricalDataTask(mContext).execute(new String[]{((TextView)(v.findViewById(R.id.stock_symbol))).getText().toString()});
+                        // TODO start detail Intend
+                        System.out.println(((TextView) (v.findViewById(R.id.stock_symbol))).getText());
+                        //new HistoricalDataTask(mContext).execute(new String[]{((TextView) (v.findViewById(R.id.stock_symbol))).getText().toString()});
+                        Intent intent = new Intent(mContext, StockDetailActivity.class).putExtra("TAG",((TextView)(v.findViewById(R.id.stock_symbol))).getText());
+                        startActivity(intent);
                     }
                 }));
         recyclerView.setAdapter(mCursorAdapter);

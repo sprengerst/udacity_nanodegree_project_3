@@ -20,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.TreeMap;
 
 
 public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Float>> {
@@ -40,6 +41,7 @@ public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Floa
         String stockTag = strings[0];
 
         StringBuilder urlStringBuilder = new StringBuilder();
+
         try {
 
             Date date = new Date();
@@ -49,7 +51,6 @@ public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Floa
             urlStringBuilder.append(URLEncoder.encode("select * from yahoo.finance.historicaldata where symbol = "
                     + " \"" + stockTag + "\" and startDate = \"" + addDays(date, -7) + "\" and endDate = \"" + getDateString(date) + "\"", "UTF-8"));
 
-            // TODO dynamic dates
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -65,7 +66,7 @@ public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Floa
                 getResponse = fetchData(urlString);
                 System.out.println("GETRESPONSE: " + getResponse);
                 // TODO fetch data to map
-                getHistoricDataFromJSON(getResponse);
+                return getHistoricDataFromJSON(getResponse);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -85,7 +86,7 @@ public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Floa
     }
 
 
-    private void getHistoricDataFromJSON(String historicChartDataJSON)
+    private Map<String,Float> getHistoricDataFromJSON(String historicChartDataJSON)
             throws JSONException, ParseException {
 
         final String CONTAINER = "query";
@@ -101,6 +102,8 @@ public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Floa
         JSONObject listHolder = queryContainer.getJSONObject(HISTORIC_LIST);
         JSONArray resultArray = listHolder.getJSONArray(HISTORIC_LIST_QUOTE);
 
+        Map<String,Float> resultMap = new TreeMap<>();
+
         for (int i = 0; i < resultArray.length(); i++) {
 
             JSONObject singleMovieJSON = resultArray.getJSONObject(i);
@@ -110,10 +113,12 @@ public class HistoricalDataTask extends AsyncTask<String, Void, Map<String, Floa
 
             System.out.println("CLOSEVALUE: "+closeValue);
             System.out.println("CLOSEDAATE: "+closeDate);
+
+            resultMap.put(closeDate,Float.parseFloat(closeValue));
         }
 
 
-
+        return resultMap;
     }
 
     private Date parseDateFormat(String date) throws ParseException {
