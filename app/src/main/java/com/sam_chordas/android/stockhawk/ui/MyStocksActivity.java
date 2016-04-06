@@ -113,7 +113,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                     if (0 != input.length()) {
                                         Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                                                 new String[]{QuoteColumns.SYMBOL}, QuoteColumns.SYMBOL + "= ?",
-                                                new String[]{input.toString()}, null);
+                                                new String[]{input.toString().toUpperCase()}, null);
                                         if (c.getCount() != 0) {
                                             Toast toast =
                                                     Toast.makeText(MyStocksActivity.this, "This stock is already saved!",
@@ -124,7 +124,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                         } else {
                                             // Add the stock to DB
                                             mServiceIntent.putExtra("tag", "add");
-                                            mServiceIntent.putExtra("symbol", input.toString());
+                                            mServiceIntent.putExtra("symbol", input.toString().toUpperCase());
                                             startService(mServiceIntent);
                                         }
                                     }else{

@@ -35,6 +35,7 @@ public class StockIntentService extends IntentService {
         try {
             stockTaskService.onRunTask(new TaskParams(intent.getStringExtra("tag"), args));
         } catch (Exception e) {
+            e.printStackTrace();
             sendMessage("You tried to enter a non-valid Stock Symbol");
         }
     }

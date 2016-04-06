@@ -27,7 +27,7 @@ public class Utils {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
-        System.out.println("JSON : "+JSON);
+        System.out.println("JSON : "+JSON.replaceAll("\",","\n\","));
         try {
             jsonObject = new JSONObject(JSON);
             if (jsonObject != null && jsonObject.length() != 0) {

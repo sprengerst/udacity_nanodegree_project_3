@@ -87,7 +87,9 @@ public class StockTaskService extends GcmTaskService {
                             initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol")) + "\",");
                     initQueryCursor.moveToNext();
                 }
+
                 mStoredSymbols.replace(mStoredSymbols.length() - 1, mStoredSymbols.length(), ")");
+
                 try {
                     urlStringBuilder.append(URLEncoder.encode(mStoredSymbols.toString(), "UTF-8"));
                 } catch (UnsupportedEncodingException e) {
