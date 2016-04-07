@@ -40,7 +40,7 @@ import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
 
-public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class StockOverviewActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -68,7 +68,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         isConnected = activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
-        setContentView(R.layout.activity_my_stocks);
+        setContentView(R.layout.stock_overview_activity);
         // The intent service is for executing immediate pulls from the Yahoo API
         // GCMTaskService can only schedule tasks, they cannot execute immediately
         mServiceIntent = new Intent(this, StockIntentService.class);
@@ -92,7 +92,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                     public void onItemClick(View v, int position) {
                         Intent intent = new Intent(mContext, StockDetailActivity.class);
                         intent.putExtra("TAG",((TextView)(v.findViewById(R.id.stock_symbol))).getText());
-                        intent.putExtra("TODAYVAL",Float.parseFloat(((TextView)(v.findViewById(R.id.bid_price))).getText().toString().replace(",",".")));
+                        intent.putExtra("TODAYVAL", Float.parseFloat(((TextView) (v.findViewById(R.id.bid_price))).getText().toString().replace(",", ".")));
                         startActivity(intent);
                     }
                 }));
@@ -119,7 +119,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                                 new String[]{input.toString().toUpperCase()}, null);
                                         if (c.getCount() != 0) {
                                             Toast toast =
-                                                    Toast.makeText(MyStocksActivity.this, "This stock is already saved!",
+                                                    Toast.makeText(StockOverviewActivity.this, "This stock is already saved!",
                                                             Toast.LENGTH_LONG);
                                             toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
                                             toast.show();
@@ -192,7 +192,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.my_stocks, menu);
+        getMenuInflater().inflate(R.menu.stock_activity_settings, menu);
         restoreActionBar();
         return true;
     }
@@ -203,11 +203,6 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         if (id == R.id.action_change_units) {
             // this is for changing stock changes from percent value to dollar value

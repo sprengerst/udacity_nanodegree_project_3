@@ -34,8 +34,7 @@ public class StockIntentService extends IntentService {
         // scheduling a task.
         try {
             stockTaskService.onRunTask(new TaskParams(intent.getStringExtra("tag"), args));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (NumberFormatException e) {
             sendMessage("You tried to enter a non-valid Stock Symbol");
         }
     }
