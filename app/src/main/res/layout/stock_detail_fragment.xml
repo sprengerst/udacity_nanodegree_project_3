@@ -3,17 +3,13 @@
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:fadeScrollbars="false">
 
     <com.db.chart.view.LineChartView
-        xmlns:chart="http://schemas.android.com/apk/res-auto"
         android:id="@+id/linechartstock"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_margin="15dp"
-        />
-
+        android:layout_margin="15dp"/>
 </FrameLayout>

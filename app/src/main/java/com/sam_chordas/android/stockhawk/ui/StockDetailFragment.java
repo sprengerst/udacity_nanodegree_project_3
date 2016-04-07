@@ -50,15 +50,19 @@ public class StockDetailFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.stock_detail_fragment, container, false);
         mLineChartView = (LineChartView) rootView.findViewById(R.id.linechartstock);
-        
+
+        StringBuilder contentDescriptionChart = new StringBuilder();
+        contentDescriptionChart.append("This chart shows the stock history for " + tag + ".");
+
         try {
 
             Map<String, Float> chartMap = new HistoricalDataTask(getActivity()).execute(new String[]{tag}).get();
 
+            System.out.println("TODAYVAL :" + todayVal);
 
-            if(!chartMap.containsKey(Utils.chartFormat(Utils.getDateString(new Date()))
-            )){
-                chartMap.put(Utils.chartFormat(Utils.getDateString(new Date())),todayVal);
+            if (!chartMap.containsKey(Utils.chartFormat(Utils.getDateString(new Date()))
+            )) {
+                chartMap.put(Utils.chartFormat(Utils.getDateString(new Date())), todayVal);
             }
 
             float minVal = Float.MAX_VALUE;
@@ -66,17 +70,18 @@ public class StockDetailFragment extends Fragment {
 
             LineSet dataset = new LineSet();
             for (Map.Entry<String, Float> historicEntry : chartMap.entrySet()) {
+
+                contentDescriptionChart.append("Stock closing value on date " + historicEntry.getKey() + " is " + historicEntry.getValue() + ".");
+
                 dataset.addPoint(historicEntry.getKey(), historicEntry.getValue());
 
-                if(maxVal<historicEntry.getValue()){
+                if (maxVal < historicEntry.getValue()) {
                     maxVal = historicEntry.getValue();
                 }
 
-                if(minVal>historicEntry.getValue()){
+                if (minVal > historicEntry.getValue()) {
                     minVal = historicEntry.getValue();
                 }
-
-                System.out.println("GETKEY" + historicEntry.getKey() + " VALUE: " + historicEntry.getValue());
             }
             dataset.setColor(Color.YELLOW);
 
@@ -96,6 +101,8 @@ public class StockDetailFragment extends Fragment {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+
+        mLineChartView.setContentDescription(contentDescriptionChart.toString());
 
 
         return rootView;
