@@ -4,15 +4,15 @@ import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -56,30 +56,22 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
     private QuoteCursorAdapter mCursorAdapter;
     private Context mContext;
     private Cursor mCursor;
-    boolean isConnected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
-        ConnectivityManager cm =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
+
         setContentView(R.layout.stock_overview_activity);
         // The intent service is for executing immediate pulls from the Yahoo API
         // GCMTaskService can only schedule tasks, they cannot execute immediately
+
         mServiceIntent = new Intent(this, StockIntentService.class);
         if (savedInstanceState == null) {
             // Run the initialize task service so that some stocks appear upon an empty database
             mServiceIntent.putExtra("tag", "init");
-            if (isConnected) {
-                startService(mServiceIntent);
-            } else {
-                networkToast();
-            }
+            startService(mServiceIntent);
         }
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -90,10 +82,14 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                 new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View v, int position) {
-                        Intent intent = new Intent(mContext, StockDetailActivity.class);
-                        intent.putExtra("TAG",((TextView)(v.findViewById(R.id.stock_symbol))).getText());
-                        intent.putExtra("TODAYVAL", Float.parseFloat(((TextView) (v.findViewById(R.id.bid_price))).getText().toString().replace(",", ".")));
-                        startActivity(intent);
+                        if (Utils.isConnected(mContext)) {
+                            Intent intent = new Intent(mContext, StockDetailActivity.class);
+                            intent.putExtra("TAG", ((TextView) (v.findViewById(R.id.stock_symbol))).getText());
+                            intent.putExtra("TODAYVAL", Float.parseFloat(((TextView) (v.findViewById(R.id.bid_price))).getText().toString().replace(",", ".")));
+                            startActivity(intent);
+                        } else {
+                            Utils.showToast("Enable internet connection to show stock charts", mContext);
+                        }
                     }
                 }));
         recyclerView.setAdapter(mCursorAdapter);
@@ -102,72 +98,76 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.attachToRecyclerView(recyclerView);
         fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isConnected) {
-                    new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
-                            .content(R.string.content_test)
-                            .inputType(InputType.TYPE_CLASS_TEXT)
-                            .input(R.string.input_hint, R.string.input_prefill, new MaterialDialog.InputCallback() {
-                                @Override
-                                public void onInput(MaterialDialog dialog, CharSequence input) {
-                                    // On FAB click, receive user input. Make sure the stock doesn't already exist
-                                    // in the DB and proceed accordingly
-                                    if (0 != input.length()) {
-                                        Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
-                                                new String[]{QuoteColumns.SYMBOL}, QuoteColumns.SYMBOL + "= ?",
-                                                new String[]{input.toString().toUpperCase()}, null);
-                                        if (c.getCount() != 0) {
-                                            Toast toast =
-                                                    Toast.makeText(StockOverviewActivity.this, "This stock is already saved!",
-                                                            Toast.LENGTH_LONG);
-                                            toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
-                                            toast.show();
-                                            return;
-                                        } else {
-                                            // Add the stock to DB
-                                            mServiceIntent.putExtra("tag", "add");
-                                            mServiceIntent.putExtra("symbol", input.toString().toUpperCase());
-                                            startService(mServiceIntent);
-                                        }
-                                    }else{
-                                        Utils.showToast("You tried to enter an empty stock symbol",dialog.getContext());
-                                    }
+                                   @Override
+                                   public void onClick(View v) {
 
-                                }
-                            })
-                            .show();
-                } else {
-                    networkToast();
-                }
+                                       if (Utils.isConnected(mContext)) {
+                                           new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
+                                                   .content(R.string.content_test)
+                                                   .inputType(InputType.TYPE_CLASS_TEXT)
+                                                   .input(R.string.input_hint, R.string.input_prefill, new MaterialDialog.InputCallback() {
+                                                       @Override
+                                                       public void onInput(MaterialDialog dialog, CharSequence input) {
+                                                           // On FAB click, receive user input. Make sure the stock doesn't already exist
+                                                           // in the DB and proceed accordingly
+                                                           if (0 != input.length()) {
+                                                               Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
+                                                                       new String[]{QuoteColumns.SYMBOL}, QuoteColumns.SYMBOL + "= ?",
+                                                                       new String[]{input.toString().toUpperCase()}, null);
+                                                               if (c.getCount() != 0) {
+                                                                   Toast toast =
+                                                                           Toast.makeText(StockOverviewActivity.this, "This stock is already saved!",
+                                                                                   Toast.LENGTH_LONG);
+                                                                   toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
+                                                                   toast.show();
+                                                                   return;
+                                                               } else {
+                                                                   // Add the stock to DB
+                                                                   mServiceIntent.putExtra("tag", "add");
+                                                                   mServiceIntent.putExtra("symbol", input.toString().toUpperCase());
+                                                                   startService(mServiceIntent);
+                                                               }
+                                                           } else {
+                                                               Utils.showToast("You tried to enter an empty stock symbol", dialog.getContext());
+                                                           }
 
-            }
-        });
+                                                       }
+                                                   })
+                                                   .show();
+                                       } else {
+                                           Utils.showToast("Add only allowed if network connection enabled", mContext);
+                                       }
+                                   }
+                               }
+        );
 
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mCursorAdapter);
-        mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper = new
+
+                ItemTouchHelper(callback);
+
         mItemTouchHelper.attachToRecyclerView(recyclerView);
 
         mTitle = getTitle();
-        if (isConnected) {
-            long period = 3600L;
-            long flex = 10L;
-            String periodicTag = "periodic";
 
-            // create a periodic task to pull stocks once every hour after the app has been opened. This
-            // is so Widget data stays up to date.
-            PeriodicTask periodicTask = new PeriodicTask.Builder()
-                    .setService(StockTaskService.class)
-                    .setPeriod(period)
-                    .setFlex(flex)
-                    .setTag(periodicTag)
-                    .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
-                    .setRequiresCharging(false)
-                    .build();
-            // Schedule task with tag "periodic." This ensure that only the stocks present in the DB
-            // are updated.
-            GcmNetworkManager.getInstance(this).schedule(periodicTask);
-        }
+        long period = 3600L;
+        long flex = 10L;
+        String periodicTag = "periodic";
+
+        // create a periodic task to pull stocks once every hour after the app has been opened. This
+        // is so Widget data stays up to date.
+        PeriodicTask periodicTask = new PeriodicTask.Builder()
+                .setService(StockTaskService.class)
+                .setPeriod(period)
+                .setFlex(flex)
+                .setTag(periodicTag)
+                .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
+                .setRequiresCharging(false)
+                .build();
+        // Schedule task with tag "periodic." This ensure that only the stocks present in the DB
+        // are updated.
+        GcmNetworkManager.getInstance(this).schedule(periodicTask);
+
     }
 
 
@@ -179,9 +179,6 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
     }
 
-    public void networkToast() {
-        Toast.makeText(mContext, getString(R.string.network_toast), Toast.LENGTH_SHORT).show();
-    }
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
@@ -250,8 +247,51 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("message");
-            Utils.showToast(message, context);
+            String state = intent.getStringExtra("state");
+
+            if (state.equals("critical")) {
+                getDATA(message);
+            } else {
+                Utils.showToast(message, context);
+            }
         }
     };
+
+
+    public void getDATA(final String message) {
+
+        if (!Utils.isConnected(this)) {
+            try {
+                AlertDialog.Builder builder =
+                        new AlertDialog.Builder(this, R.style.InternetAlertDialogStyle);
+                builder.setTitle(getResources().getString(R.string.app_name));
+                builder.setMessage(message);
+                builder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        getDATA(message);
+                    }
+                });
+                builder.setCancelable(false);
+                builder.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        //Wait to connect (for wifi)
+                        Thread.sleep(1000);
+                        mServiceIntent.putExtra("tag", "init");
+                        startService(mServiceIntent);
+                    } catch (Exception e) {
+                    }
+                }
+            }.start();
+        }
+    }
+
 
 }

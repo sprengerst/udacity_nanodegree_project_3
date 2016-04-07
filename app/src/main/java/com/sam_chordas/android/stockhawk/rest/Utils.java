@@ -2,9 +2,14 @@ package com.sam_chordas.android.stockhawk.rest;
 
 import android.content.ContentProviderOperation;
 import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 
@@ -26,7 +31,7 @@ public class Utils {
 
     public static boolean showPercent = true;
 
-    public static ArrayList quoteJsonToContentVals(String JSON) {
+    public static ArrayList quoteJsonToContentVals(String JSON, Context context) {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
@@ -39,14 +44,24 @@ public class Utils {
                 if (count == 1) {
                     jsonObject = jsonObject.getJSONObject("results")
                             .getJSONObject("quote");
-                    batchOperations.add(buildBatchOperation(jsonObject));
+
+                    if(validJSONObject(jsonObject)) {
+                        batchOperations.add(buildBatchOperation(jsonObject));
+                    }else{
+                        sendMessage("The JSON Object which you tried to enter is not valid","normal",context);
+                    }
                 } else {
                     resultsArray = jsonObject.getJSONObject("results").getJSONArray("quote");
 
                     if (resultsArray != null && resultsArray.length() != 0) {
                         for (int i = 0; i < resultsArray.length(); i++) {
                             jsonObject = resultsArray.getJSONObject(i);
-                            batchOperations.add(buildBatchOperation(jsonObject));
+
+                            if(validJSONObject(jsonObject)) {
+                                batchOperations.add(buildBatchOperation(jsonObject));
+                            }else{
+                                sendMessage("The JSON Object which you tried to enter is not valid","normal",context);
+                            }
                         }
                     }
                 }
@@ -57,7 +72,18 @@ public class Utils {
         return batchOperations;
     }
 
-    public static String truncateBidPrice(String bidPrice) {
+    public static void sendMessage(String errorMessage,String state, Context context) {
+        Intent intent = new Intent(context.getString(R.string.broadcast_resource_stock));
+        intent.putExtra("message", errorMessage);
+        intent.putExtra("state", state);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+    }
+
+    private static boolean validJSONObject(JSONObject jsonObject) throws JSONException{
+        return !("null").equals(jsonObject.getString("Bid")) && !("null").equals(jsonObject.getString("ChangeinPercent"));
+    }
+
+    public static String truncateBidPrice(String bidPrice) throws Exception{
         bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
         return bidPrice;
     }
@@ -85,6 +111,7 @@ public class Utils {
         try {
             String change = jsonObject.getString("Change");
             builder.withValue(QuoteColumns.SYMBOL, jsonObject.getString("symbol"));
+
             builder.withValue(QuoteColumns.BIDPRICE, truncateBidPrice(jsonObject.getString("Bid")));
             builder.withValue(QuoteColumns.PERCENT_CHANGE, truncateChange(
                     jsonObject.getString("ChangeinPercent"), true));
@@ -96,7 +123,7 @@ public class Utils {
                 builder.withValue(QuoteColumns.ISUP, 1);
             }
 
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return builder.build();
@@ -123,4 +150,14 @@ public class Utils {
     public static String chartFormat(String closeDate) throws ParseException {
         return new SimpleDateFormat("MM-dd").format(parseDateFormat(closeDate));
     }
+
+
+    public static boolean isConnected(Context context) {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+
 }
