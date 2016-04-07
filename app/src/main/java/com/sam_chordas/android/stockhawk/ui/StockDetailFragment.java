@@ -4,8 +4,10 @@
 
 package com.sam_chordas.android.stockhawk.ui;
 
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -16,6 +18,8 @@ import com.db.chart.model.LineSet;
 import com.db.chart.view.ChartView;
 import com.db.chart.view.LineChartView;
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.data.QuoteColumns;
+import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.tasks.HistoricalDataTask;
 
@@ -27,7 +31,7 @@ import java.util.concurrent.ExecutionException;
 
 public class StockDetailFragment extends Fragment {
 
-    static final String DETAIL_URI = "DETAIL_URI";
+    public static final String DETAIL_URI = "DETAIL_URI";
 
     private LineChartView mLineChartView;
 
@@ -44,8 +48,19 @@ public class StockDetailFragment extends Fragment {
         String tag = null;
         float todayVal = 0;
         if (arguments != null) {
-            tag = arguments.getString("TAG");
-            todayVal = arguments.getFloat("TODAYVAL");
+            Uri uri = arguments.getParcelable(StockDetailFragment.DETAIL_URI);
+            String symbol = uri.getPathSegments().get(1);
+
+            Cursor c = getContext().getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
+                    new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP}, QuoteColumns.SYMBOL + "= ?",
+                    new String[]{symbol.toUpperCase()}, null);
+
+            c.moveToFirst();
+
+            tag = c.getString(c.getColumnIndex(QuoteColumns.SYMBOL));
+            todayVal = Float.parseFloat(c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE)).replace(",","."));
+
         }
 
         View rootView = inflater.inflate(R.layout.stock_detail_fragment, container, false);

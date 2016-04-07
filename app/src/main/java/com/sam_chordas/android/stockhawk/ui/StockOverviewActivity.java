@@ -83,9 +83,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                     @Override
                     public void onItemClick(View v, int position) {
                         if (Utils.isConnected(mContext)) {
-                            Intent intent = new Intent(mContext, StockDetailActivity.class);
-                            intent.putExtra("TAG", ((TextView) (v.findViewById(R.id.stock_symbol))).getText());
-                            intent.putExtra("TODAYVAL", Float.parseFloat(((TextView) (v.findViewById(R.id.bid_price))).getText().toString().replace(",", ".")));
+                            Intent intent = new Intent(mContext, StockDetailActivity.class).setData(QuoteProvider.Quotes.withSymbol(((TextView) (v.findViewById(R.id.stock_symbol))).getText().toString()));
                             startActivity(intent);
                         } else {
                             Utils.showToast("Enable internet connection to show stock charts", mContext);
@@ -93,7 +91,6 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                     }
                 }));
         recyclerView.setAdapter(mCursorAdapter);
-
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.attachToRecyclerView(recyclerView);
@@ -150,7 +147,8 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
 
         mTitle = getTitle();
 
-        long period = 3600L;
+//        long period = 3600L;
+        long period = 3L;
         long flex = 10L;
         String periodicTag = "periodic";
 
@@ -259,7 +257,6 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
 
 
     public void getDATA(final String message) {
-
         if (!Utils.isConnected(this)) {
             try {
                 AlertDialog.Builder builder =

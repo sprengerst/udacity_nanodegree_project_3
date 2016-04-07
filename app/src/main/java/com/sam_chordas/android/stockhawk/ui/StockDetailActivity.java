@@ -18,13 +18,8 @@ public class StockDetailActivity extends AppCompatActivity {
         setContentView(R.layout.stock_detail_activity);
         if (savedInstanceState == null) {
 
-            Bundle bundle = getIntent().getExtras();
-            float todayVal = bundle.getFloat("TODAYVAL");
-            String chosenTag = bundle.getString("TAG");
-
             Bundle arguments = new Bundle();
-            arguments.putString("TAG", chosenTag);
-            arguments.putFloat("TODAYVAL", todayVal);
+            arguments.putParcelable(StockDetailFragment.DETAIL_URI, getIntent().getData());
 
             StockDetailFragment fragment = new StockDetailFragment();
             fragment.setArguments(arguments);

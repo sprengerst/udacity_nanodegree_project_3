@@ -2,6 +2,7 @@ package com.sam_chordas.android.stockhawk.service;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -130,23 +131,38 @@ public class StockTaskService extends GcmTaskService {
                     try {
                         ContentValues contentValues = new ContentValues();
                         // update ISCURRENT to 0 (false) so new data is current
-                        if (isUpdate) {
+                            if (isUpdate) {
                             contentValues.put(QuoteColumns.ISCURRENT, 0);
                             mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
                                     null, null);
                         }
                         mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
                                 Utils.quoteJsonToContentVals(getResponse,mContext));
+
+                        updateWidgets();
+
                     } catch (RemoteException | OperationApplicationException e) {
                         Log.e(LOG_TAG, "Error applying batch insert", e);
                     }
                 }else{
-                    Utils.sendMessage("Problems while fetching data, please check your internet connection","normal",mContext);
+                    Utils.sendMessage("Problems while fetching/updating data, please check your internet connection","normal",mContext);
                 }
         }
 
         return result;
     }
+
+
+    public static final String ACTION_DATA_UPDATED =
+            "com.sam_chordas.android.stockhawk.ACTION_DATA_UPDATED";
+
+    private void updateWidgets() {
+        // Setting the package ensures that only components in our app will receive the broadcast
+        Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED)
+                .setPackage(mContext.getPackageName());
+        mContext.sendBroadcast(dataUpdatedIntent);
+    }
+
 
 
 
