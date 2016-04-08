@@ -43,10 +43,13 @@ public class DetailWidgetRemoteViewsService extends RemoteViewsService {
                 // that calls use our process and permission
                 final long identityToken = Binder.clearCallingIdentity();
 
+                // Fix for endless scrolling widget
                 data = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                         new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-                                QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},null,
-                        null, null);
+                                QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
+                        QuoteColumns.ISCURRENT + " = ?",
+                        new String[]{"1"},
+                        null);
 
                 System.out.println("DATA COUNT: "+data.getCount());
                 DatabaseUtils.dumpCursor(data);
