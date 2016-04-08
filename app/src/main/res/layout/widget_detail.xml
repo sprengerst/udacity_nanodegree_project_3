@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="@dimen/widget_margin">
+    android:padding="@dimen/widget_margin"
+    android:background="@color/material_orange_700">
 
     <FrameLayout
         android:id="@+id/widget"
@@ -14,7 +15,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/app_name"
             android:layout_gravity="center"
-            android:src="@drawable/common_plus_signin_btn_icon_light"
+            android:src="@drawable/stock_widget"
             />
     </FrameLayout>
     <FrameLayout
