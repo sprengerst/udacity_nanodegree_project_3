@@ -31,7 +31,7 @@ public class Utils {
 
     public static boolean showPercent = true;
 
-    public static ArrayList quoteJsonToContentVals(String JSON, Context context) {
+    public static ArrayList<ContentProviderOperation> quoteJsonToContentVals(String JSON, Context context) {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;

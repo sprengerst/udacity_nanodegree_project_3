@@ -26,6 +26,7 @@ public class DetailWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // Perform this loop procedure for each App Widget that belongs to this provider
         for (int appWidgetId : appWidgetIds) {
+            System.out.println("UPDATE WIDGET EXECUTION");
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_detail);
 
             // Create an Intent to launch MainActivity
@@ -62,7 +63,12 @@ public class DetailWidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         super.onReceive(context, intent);
+        System.out.println("ONRECEIVE TRIGGERED");
+
+
+        System.out.println("ONRECEIVE ACTION:"+intent.getAction());
         if (StockTaskService.ACTION_DATA_UPDATED.equals(intent.getAction())) {
+            System.out.println("ONRECEIVE NOTIFY");
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(
                     new ComponentName(context, getClass()));

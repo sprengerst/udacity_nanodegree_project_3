@@ -36,7 +36,9 @@ public class StockTaskService extends GcmTaskService {
     private StringBuilder mStoredSymbols = new StringBuilder();
     private boolean isUpdate;
 
-    public StockTaskService() {
+
+    public StockTaskService(){
+        super();
     }
 
     public StockTaskService(Context context) {
@@ -77,9 +79,9 @@ public class StockTaskService extends GcmTaskService {
             initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                     new String[]{"Distinct " + QuoteColumns.SYMBOL}, null,
                     null, null);
-            if (initQueryCursor.getCount() == 0 || initQueryCursor == null) {
-                if(!Utils.isConnected(mContext)){
-                    Utils.sendMessage("You have to run this app with internet for the first time","critical",mContext);
+            if (initQueryCursor == null || initQueryCursor.getCount() == 0) {
+                if (!Utils.isConnected(mContext)) {
+                    Utils.sendMessage("You have to run this app with internet for the first time", "critical", mContext);
                 }
                 // Init task. Populates DB with quotes for the symbols seen below
                 try {
@@ -88,12 +90,11 @@ public class StockTaskService extends GcmTaskService {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-            } else if (initQueryCursor != null) {
+            } else {
                 DatabaseUtils.dumpCursor(initQueryCursor);
                 initQueryCursor.moveToFirst();
                 for (int i = 0; i < initQueryCursor.getCount(); i++) {
-                    mStoredSymbols.append("\"" +
-                            initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol")) + "\",");
+                    mStoredSymbols.append("\"").append(initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol"))).append("\",");
                     initQueryCursor.moveToNext();
                 }
 
@@ -116,38 +117,36 @@ public class StockTaskService extends GcmTaskService {
             }
         }
         // finalize the URL for the API query.
-        urlStringBuilder.append("&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables."
-                + "org%2Falltableswithkeys&callback=");
+        urlStringBuilder.append("&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=");
 
         String urlString;
         String getResponse;
         int result = GcmNetworkManager.RESULT_FAILURE;
 
-        if (urlStringBuilder != null) {
-            urlString = urlStringBuilder.toString();
-                getResponse = fetchData(urlString);
-                if(getResponse != null) {
-                    result = GcmNetworkManager.RESULT_SUCCESS;
-                    try {
-                        ContentValues contentValues = new ContentValues();
-                        // update ISCURRENT to 0 (false) so new data is current
-                            if (isUpdate) {
-                            contentValues.put(QuoteColumns.ISCURRENT, 0);
-                            mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
-                                    null, null);
-                        }
-                        mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,
-                                Utils.quoteJsonToContentVals(getResponse,mContext));
-
-                        updateWidgets();
-
-                    } catch (RemoteException | OperationApplicationException e) {
-                        Log.e(LOG_TAG, "Error applying batch insert", e);
-                    }
-                }else{
-                    Utils.sendMessage("Problems while fetching/updating data, please check your internet connection","normal",mContext);
+        urlString = urlStringBuilder.toString();
+        getResponse = fetchData(urlString);
+        if (getResponse != null) {
+            result = GcmNetworkManager.RESULT_SUCCESS;
+            try {
+                ContentValues contentValues = new ContentValues();
+                // update ISCURRENT to 0 (false) so new data is current
+                if (isUpdate) {
+                    contentValues.put(QuoteColumns.ISCURRENT, 0);
+                    mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
+                            null, null);
                 }
+                mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY, Utils.quoteJsonToContentVals(getResponse, mContext));
+
+            } catch (RemoteException | OperationApplicationException e) {
+                Log.e(LOG_TAG, "Error applying batch insert", e);
+            }
+
+            updateWidgets();
+        } else {
+            Utils.sendMessage("Problems while fetching/updating data, please check your internet connection", "normal", mContext);
         }
+
+
 
         return result;
     }
@@ -157,13 +156,12 @@ public class StockTaskService extends GcmTaskService {
             "com.sam_chordas.android.stockhawk.ACTION_DATA_UPDATED";
 
     private void updateWidgets() {
+        System.out.println("UPDATE WIDGET");
         // Setting the package ensures that only components in our app will receive the broadcast
         Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED)
                 .setPackage(mContext.getPackageName());
         mContext.sendBroadcast(dataUpdatedIntent);
     }
-
-
 
 
 }

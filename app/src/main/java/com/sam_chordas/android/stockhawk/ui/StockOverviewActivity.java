@@ -139,9 +139,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         );
 
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mCursorAdapter);
-        mItemTouchHelper = new
-
-                ItemTouchHelper(callback);
+        mItemTouchHelper = new ItemTouchHelper(callback);
 
         mItemTouchHelper.attachToRecyclerView(recyclerView);
 
@@ -156,8 +154,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         // is so Widget data stays up to date.
         PeriodicTask periodicTask = new PeriodicTask.Builder()
                 .setService(StockTaskService.class)
-                .setPeriod(period)
-                .setFlex(flex)
+                .setPeriod(3)
                 .setTag(periodicTag)
                 .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
                 .setRequiresCharging(false)
