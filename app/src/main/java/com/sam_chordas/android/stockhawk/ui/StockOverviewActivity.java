@@ -43,13 +43,6 @@ import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallb
 
 public class StockOverviewActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
     private CharSequence mTitle;
     private Intent mServiceIntent;
     private static final int CURSOR_LOADER_ID = 0;
@@ -65,12 +58,12 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
 
         mServiceIntent = new Intent(this, StockIntentService.class);
         if (savedInstanceState == null) {
-            mServiceIntent.putExtra("tag", "init");
-            startService(mServiceIntent);
+            initService();
         }
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         assert recyclerView != null;
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
 
@@ -83,7 +76,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                             Intent intent = new Intent(mContext, StockDetailActivity.class).setData(QuoteProvider.Quotes.withSymbol(((TextView) (v.findViewById(R.id.stock_symbol))).getText().toString()));
                             startActivity(intent);
                         } else {
-                            Utils.showToast("Enable internet connection to show stock charts", mContext);
+                            Utils.showToast(getString(R.string.err_stock_detail_network), mContext);
                         }
                     }
                 }));
@@ -104,8 +97,6 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                                                    .input(R.string.input_hint, R.string.input_prefill, new MaterialDialog.InputCallback() {
                                                        @Override
                                                        public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                                                           // On FAB click, receive user input. Make sure the stock doesn't already exist
-                                                           // in the DB and proceed accordingly
                                                            if (0 != input.length()) {
                                                                Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                                                                        new String[]{QuoteColumns.SYMBOL}, QuoteColumns.SYMBOL + "= ?",
@@ -113,28 +104,27 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                                                                assert c != null;
                                                                if (c.getCount() != 0) {
                                                                    Toast toast =
-                                                                           Toast.makeText(StockOverviewActivity.this, "This stock is already saved!",
+                                                                           Toast.makeText(StockOverviewActivity.this, R.string.err_stock_duplicate,
                                                                                    Toast.LENGTH_LONG);
                                                                    toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
                                                                    toast.show();
                                                                    return;
                                                                } else {
-                                                                   // Add the stock to DB
-                                                                   mServiceIntent.putExtra("tag", "add");
-                                                                   mServiceIntent.putExtra("symbol", input.toString().toUpperCase());
+                                                                   mServiceIntent.putExtra(getString(R.string.service_state_tag), getString(R.string.service_state_add));
+                                                                   mServiceIntent.putExtra(getString(R.string.service_symbol), input.toString().toUpperCase());
                                                                    startService(mServiceIntent);
                                                                }
 
                                                                c.close();
                                                            } else {
-                                                               Utils.showToast("You tried to enter an empty stock symbol", dialog.getContext());
+                                                               Utils.showToast(getString(R.string.err_add_empty_symbol), dialog.getContext());
                                                            }
 
                                                        }
                                                    })
                                                    .show();
                                        } else {
-                                           Utils.showToast("Add only allowed if network connection enabled", mContext);
+                                           Utils.showToast(getString(R.string.err_add_only_if_network), mContext);
                                        }
                                    }
                                }
@@ -148,26 +138,25 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         mTitle = getTitle();
 
 //        long period = 3600L;
-        long period = 3L;
+        long period = 3L; // TODO
         long flex = 10L;
-        String periodicTag = "periodic";
 
-        // create a periodic task to pull stocks once every hour after the app has been opened. This
-        // is so Widget data stays up to date.
         PeriodicTask periodicTask = new PeriodicTask.Builder()
                 .setService(StockTaskService.class)
                 .setPeriod(period)
                 .setFlex(flex)
-                .setTag(periodicTag)
+                .setTag(getString(R.string.service_state_periodic))
                 .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
                 .setRequiresCharging(false)
                 .build();
-        // Schedule task with tag "periodic." This ensure that only the stocks present in the DB
-        // are updated.
-        GcmNetworkManager.getInstance(this).schedule(periodicTask);
 
+        GcmNetworkManager.getInstance(this).schedule(periodicTask);
     }
 
+    private void initService() {
+        mServiceIntent.putExtra(getString(R.string.service_state_tag), getString(R.string.service_state_init));
+        startService(mServiceIntent);
+    }
 
     @Override
     public void onResume() {
@@ -176,7 +165,6 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         super.onResume();
         getLoaderManager().restartLoader(CURSOR_LOADER_ID, null, this);
     }
-
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
@@ -195,13 +183,9 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == R.id.action_change_units) {
-            // this is for changing stock changes from percent value to dollar value
             Utils.showPercent = !Utils.showPercent;
             this.getContentResolver().notifyChange(QuoteProvider.Quotes.CONTENT_URI, null);
         }
@@ -211,7 +195,6 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // This narrows the return to only the stocks that are most current.
         return new CursorLoader(this, QuoteProvider.Quotes.CONTENT_URI,
                 new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
                         QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
@@ -233,21 +216,18 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
 
     @Override
     protected void onPause() {
-        // Unregister since the activity is paused.
         LocalBroadcastManager.getInstance(this).unregisterReceiver(
                 mMessageReceiver);
         super.onPause();
     }
 
-    // Our handler for received Intents. This will be called whenever an Intent
-    // with an action named "custom-event-name" is broadcasted.
     private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("message");
-            String state = intent.getStringExtra("state");
+            String message = intent.getStringExtra(getString(R.string.priority_message));
+            String state = intent.getStringExtra(getString(R.string.priority_state));
 
-            if (state.equals("critical")) {
+            if (state.equals(getString(R.string.priority_alert_critical))) {
                 forceDataWithMessage(message);
             } else {
                 Utils.showToast(message, context);
@@ -262,7 +242,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                         new AlertDialog.Builder(this, R.style.InternetAlertDialogStyle);
                 builder.setTitle(getResources().getString(R.string.app_name));
                 builder.setMessage(message);
-                builder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(getString(R.string.force_data_btn), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         forceDataWithMessage(message);
@@ -274,10 +254,8 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                 e.printStackTrace();
             }
         } else {
-            mServiceIntent.putExtra("tag", "init");
-            startService(mServiceIntent);
+            initService();
         }
     }
-
 
 }

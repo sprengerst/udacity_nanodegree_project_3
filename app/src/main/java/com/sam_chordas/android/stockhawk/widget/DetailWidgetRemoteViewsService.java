@@ -15,7 +15,8 @@ import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 
 /**
- * RemoteViewsService controlling the data being shown in the scrollable weather detail widget
+ * Created by Stefan Sprenger
+ *
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class DetailWidgetRemoteViewsService extends RemoteViewsService {
@@ -77,21 +78,11 @@ public class DetailWidgetRemoteViewsService extends RemoteViewsService {
                 views.setTextViewText(R.id.stock_symbol_widget, symbol);
                 views.setTextViewText(R.id.bid_price_widget, bidPrice);
 
-
                 if (data.getInt(data.getColumnIndex("is_up")) == 1) {
                         views.setInt(R.id.change_widget, "setBackgroundResource", R.drawable.percent_change_pill_green);
                 } else {
                     views.setInt(R.id.change_widget, "setBackgroundResource", R.drawable.percent_change_pill_red);
                 }
-//
-//                if (Utils.showPercent) {
-//                    viewHolder.change.setContentDescription("Percentage Change" +cursor.getString(cursor.getColumnIndex("percent_change")));
-//                    viewHolder.change.setText(cursor.getString(cursor.getColumnIndex("percent_change")));
-//                } else {
-//                    viewHolder.change.setContentDescription("Change "+cursor.getString(cursor.getColumnIndex("change")));
-//                    viewHolder.change.setText(cursor.getString(cursor.getColumnIndex("change")));
-//                }
-//
 
                 views.setTextViewText(R.id.change_widget, percentChange);
 

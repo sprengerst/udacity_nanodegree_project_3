@@ -22,7 +22,7 @@ import com.sam_chordas.android.stockhawk.ui.StockOverviewActivity;
 public class DetailWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
-            System.out.println("UPDATE WIDGET EXECUTION");
+//            System.out.println("UPDATE WIDGET EXECUTION");
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_detail);
 
             Intent intent = new Intent(context, StockOverviewActivity.class);
@@ -50,7 +50,7 @@ public class DetailWidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(@NonNull Context context, @NonNull Intent intent) {
         super.onReceive(context, intent);
-        System.out.println("ONRECEIVE ACTION:"+intent.getAction());
+//        System.out.println("ONRECEIVE ACTION:"+intent.getAction());
         if (StockTaskService.ACTION_DATA_UPDATED.equals(intent.getAction())) {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(

@@ -1,19 +1,51 @@
 <resources>
-  <string name="app_name">Stock Hawk</string>
+    <string name="app_name">Stock Hawk</string>
 
-  <string name="action_example">Example action</string>
+    <string name="action_example">Example action</string>
 
-  <string name="action_settings">Settings</string>
-  <string name="action_change_units">Change Units</string>
-  <string name="symbol_search">Symbol Search</string>
-  <string name="content_test">Search for a Stock Symbol</string>
-  <string name="input_hint">FB</string>
-  <string name="input_prefill"></string>
-  <string name="network_toast">Uh-oh! This app requires an internet connection</string>
-  <string name="broadcast_resource_stock">stock-service-listener</string>
-  <string name="add_new_stock_entry">Click here to add and search for a Stock Symbol</string>
-  <string name="accessible_stock_symbol">"Stock Symbol "</string>
-  <string name="accessible_bid_price">"Bid Price "</string>
-  <string name="accessible_percentage_change">Percentage Change</string>
-  <string name="accessible_change">"Change "</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_change_units">Change Units</string>
+    <string name="symbol_search">Symbol Search</string>
+    <string name="content_test">Search for a Stock Symbol</string>
+    <string name="input_hint">FB</string>
+    <string name="input_prefill"></string>
+    <string name="network_toast">Uh-oh! This app requires an internet connection</string>
+    <string name="broadcast_resource_stock">stock-service-listener</string>
+    <string name="add_new_stock_entry">Click here to add and search for a Stock Symbol</string>
+    <string name="accessible_stock_symbol">"Stock Symbol "</string>
+    <string name="accessible_bid_price">"Bid Price "</string>
+    <string name="accessible_percentage_change">Percentage Change</string>
+    <string name="accessible_change">"Change "</string>
+
+    <string name="non_valid_stock_symbol_add">The stock symbol which you tried to enter is not valid</string>
+
+    <string name="chart_date_format">dd/M hh:mm a</string>
+
+    <string name="json_yahoo_bid">Bid</string>
+    <string name="json_yahoo_changeinpercent">ChangeinPercent</string>
+    <string name="json_yahoo_change">Change</string>
+    <string name="json_yahoo_symbol">symbol</string>
+    <string name="json_yahoo_query">query</string>
+    <string name="json_yahoo_count">count</string>
+    <string name="json_yahoo_results">results</string>
+    <string name="json_yahoo_quote">quote</string>
+    <string name="json_yahoo_nullstring">null</string>
+    <string name="force_data_btn">Try Again</string>
+
+    <string name="priority_alert_normal">normal</string>
+    <string name="priority_message">message</string>
+    <string name="priority_state">state</string>
+    <string name="priority_alert_critical">critical</string>
+
+    <string name="service_state_init">init</string>
+    <string name="service_state_tag">tag</string>
+    <string name="err_add_only_if_network">Add only allowed if network connection enabled</string>
+    <string name="err_add_empty_symbol">You tried to enter an empty stock symbol</string>
+    <string name="err_stock_detail_network">Enable internet connection to show stock charts</string>
+    <string name="err_stock_duplicate">This stock is already saved!</string>
+    <string name="service_state_add">add</string>
+    <string name="service_symbol">symbol</string>
+    <string name="service_state_periodic">periodic</string>
+
+
 </resources>

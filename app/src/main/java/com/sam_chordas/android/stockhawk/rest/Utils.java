@@ -23,43 +23,46 @@ import java.util.Date;
 
 /**
  * Created by sam_chordas on 10/8/15.
+ * <p/>
+ * <p/>
+ * Modified by Stefan Sprenger
  */
 public class Utils {
 
-    private static String LOG_TAG = Utils.class.getSimpleName();
+    private static final String LOG_TAG = Utils.class.getSimpleName();
 
     public static boolean showPercent = true;
 
     public static ArrayList<ContentProviderOperation> quoteJsonToContentVals(String JSON, Context context) {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
-        JSONObject jsonObject = null;
-        JSONArray resultsArray = null;
-        System.out.println("JSON : " + JSON.replaceAll("\",", "\n\","));
+        JSONObject jsonObject;
+        JSONArray resultsArray;
+//        System.out.println("JSON : " + JSON.replaceAll("\",", "\n\","));
         try {
             jsonObject = new JSONObject(JSON);
-            if (jsonObject != null && jsonObject.length() != 0) {
-                jsonObject = jsonObject.getJSONObject("query");
-                int count = Integer.parseInt(jsonObject.getString("count"));
+            if (jsonObject.length() != 0) {
+                jsonObject = jsonObject.getJSONObject(context.getString(R.string.json_yahoo_query));
+                int count = Integer.parseInt(jsonObject.getString(context.getString(R.string.json_yahoo_count)));
                 if (count == 1) {
-                    jsonObject = jsonObject.getJSONObject("results")
-                            .getJSONObject("quote");
+                    jsonObject = jsonObject.getJSONObject(context.getString(R.string.json_yahoo_results))
+                            .getJSONObject(context.getString(R.string.json_yahoo_quote));
 
-                    if (validJSONObject(jsonObject)) {
-                        batchOperations.add(buildBatchOperation(jsonObject));
+                    if (validJSONObject(jsonObject, context)) {
+                        batchOperations.add(buildBatchOperation(jsonObject, context));
                     } else {
-                        sendMessage("The stock symbol which you tried to enter is not valid", "normal", context);
+                        sendMessage(context.getString(R.string.non_valid_stock_symbol_add), context.getString(R.string.priority_alert_normal), context);
                     }
                 } else {
-                    resultsArray = jsonObject.getJSONObject("results").getJSONArray("quote");
+                    resultsArray = jsonObject.getJSONObject(context.getString(R.string.json_yahoo_results)).getJSONArray(context.getString(R.string.json_yahoo_quote));
 
                     if (resultsArray != null && resultsArray.length() != 0) {
                         for (int i = 0; i < resultsArray.length(); i++) {
                             jsonObject = resultsArray.getJSONObject(i);
 
-                            if (validJSONObject(jsonObject)) {
-                                batchOperations.add(buildBatchOperation(jsonObject));
+                            if (validJSONObject(jsonObject, context)) {
+                                batchOperations.add(buildBatchOperation(jsonObject, context));
                             } else {
-                                sendMessage("The stock symbol which you tried to enter is not valid", "normal", context);
+                                sendMessage(context.getString(R.string.non_valid_stock_symbol_add), context.getString(R.string.priority_alert_normal), context);
                             }
                         }
                     }
@@ -74,21 +77,22 @@ public class Utils {
 
     public static void sendMessage(String errorMessage, String state, Context context) {
         Intent intent = new Intent(context.getString(R.string.broadcast_resource_stock));
-        intent.putExtra("message", errorMessage);
-        intent.putExtra("state", state);
+        intent.putExtra(context.getString(R.string.priority_message), errorMessage);
+        intent.putExtra(context.getString(R.string.priority_state), state);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
-    private static boolean validJSONObject(JSONObject jsonObject) throws JSONException {
-        return !("null").equals(jsonObject.getString("Bid")) && !("null").equals(jsonObject.getString("ChangeinPercent"));
+    private static boolean validJSONObject(JSONObject jsonObject, Context context) throws JSONException {
+        return !(context.getString(R.string.json_yahoo_nullstring)).equals(jsonObject.getString(context.getString(R.string.json_yahoo_bid))) &&
+                !(context.getString(R.string.json_yahoo_nullstring)).equals(jsonObject.getString(context.getString(R.string.json_yahoo_changeinpercent)));
     }
 
-    public static String truncateBidPrice(String bidPrice) throws Exception {
+    private static String truncateBidPrice(String bidPrice) {
         bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
         return bidPrice;
     }
 
-    public static String truncateChange(String change, boolean isPercentChange) {
+    private static String truncateChange(String change, boolean isPercentChange) {
         String weight = change.substring(0, 1);
         String ampersand = "";
         if (isPercentChange) {
@@ -98,25 +102,25 @@ public class Utils {
         change = change.substring(1, change.length());
         double round = (double) Math.round(Double.parseDouble(change) * 100) / 100;
         change = String.format("%.2f", round);
-        StringBuffer changeBuffer = new StringBuffer(change);
+        StringBuilder changeBuffer = new StringBuilder(change);
         changeBuffer.insert(0, weight);
         changeBuffer.append(ampersand);
         change = changeBuffer.toString();
         return change;
     }
 
-    public static ContentProviderOperation buildBatchOperation(JSONObject jsonObject) {
+    private static ContentProviderOperation buildBatchOperation(JSONObject jsonObject, Context context) {
         ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
                 QuoteProvider.Quotes.CONTENT_URI);
         try {
-            String change = jsonObject.getString("Change");
-            builder.withValue(QuoteColumns.SYMBOL, jsonObject.getString("symbol"));
+            String change = jsonObject.getString(context.getString(R.string.json_yahoo_change));
+            builder.withValue(QuoteColumns.SYMBOL, jsonObject.getString(context.getString(R.string.json_yahoo_symbol)));
 
-            builder.withValue(QuoteColumns.BIDPRICE, truncateBidPrice(jsonObject.getString("Bid")));
+            builder.withValue(QuoteColumns.BIDPRICE, truncateBidPrice(jsonObject.getString(context.getString(R.string.json_yahoo_bid))));
             builder.withValue(QuoteColumns.PERCENT_CHANGE, truncateChange(
-                    jsonObject.getString("ChangeinPercent"), true));
+                    jsonObject.getString(context.getString(R.string.json_yahoo_changeinpercent)), true));
             builder.withValue(QuoteColumns.CHANGE, truncateChange(change, false));
-            builder.withValue(QuoteColumns.CREATEDATE, getCurrentDateFormat());
+            builder.withValue(QuoteColumns.CREATEDATE, getCurrentDateFormat(context));
             builder.withValue(QuoteColumns.ISCURRENT, 1);
             if (change.charAt(0) == '-') {
                 builder.withValue(QuoteColumns.ISUP, 0);
@@ -130,8 +134,8 @@ public class Utils {
         return builder.build();
     }
 
-    private static String getCurrentDateFormat() {
-        SimpleDateFormat outputYahooFormat = new SimpleDateFormat("dd/M hh:mm a");
+    private static String getCurrentDateFormat(Context context) {
+        SimpleDateFormat outputYahooFormat = new SimpleDateFormat(context.getString(R.string.chart_date_format));
         return outputYahooFormat.format(new Date());
     }
 
