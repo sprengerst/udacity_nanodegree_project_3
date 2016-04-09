@@ -70,13 +70,13 @@ public class StockTaskService extends GcmTaskService {
         StringBuilder urlStringBuilder = new StringBuilder();
         try {
             // Base URL for the Yahoo query
-            urlStringBuilder.append(getString(R.string.yahoo_api_https));
-            urlStringBuilder.append(URLEncoder.encode(getString(R.string.yahoo_api_select_quotes), "UTF-8"));
+            urlStringBuilder.append(mContext.getString(R.string.yahoo_api_https));
+            urlStringBuilder.append(URLEncoder.encode(mContext.getString(R.string.yahoo_api_select_quotes), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-        if (params.getTag().equals(getString(R.string.service_state_init)) || params.getTag().equals(getString(R.string.service_state_periodic))) {
+        if (params.getTag().equals(mContext.getString(R.string.service_state_init)) || params.getTag().equals(mContext.getString(R.string.service_state_periodic))) {
             isUpdate = true;
             initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                     new String[]{"Distinct " + QuoteColumns.SYMBOL}, null,
@@ -84,7 +84,7 @@ public class StockTaskService extends GcmTaskService {
 
             if (initQueryCursor == null || initQueryCursor.getCount() == 0) {
                 if (!Utils.isConnected(mContext)) {
-                    Utils.sendMessage(getString(R.string.err_run_app_with_internet_ft), getString(R.string.priority_alert_critical), mContext);
+                    Utils.sendMessage(mContext.getString(R.string.err_run_app_with_internet_ft), mContext.getString(R.string.priority_alert_critical), mContext);
                 }
 
                 try {
@@ -109,10 +109,10 @@ public class StockTaskService extends GcmTaskService {
                     e.printStackTrace();
                 }
             }
-        } else if (params.getTag().equals(getString(R.string.service_state_add))) {
+        } else if (params.getTag().equals(mContext.getString(R.string.service_state_add))) {
             isUpdate = false;
             // get symbol from params.getExtra and build query
-            String stockInput = params.getExtras().getString(getString(R.string.service_symbol));
+            String stockInput = params.getExtras().getString(mContext.getString(R.string.service_symbol));
             try {
                 urlStringBuilder.append(URLEncoder.encode("\"" + stockInput + "\")", "UTF-8"));
             } catch (UnsupportedEncodingException e) {
@@ -120,7 +120,7 @@ public class StockTaskService extends GcmTaskService {
             }
         }
         // finalize the URL for the API query.
-        urlStringBuilder.append(getString(R.string.yahoo_api_additional_callback));
+        urlStringBuilder.append(mContext.getString(R.string.yahoo_api_additional_callback));
 
         String urlString;
         String getResponse;
@@ -147,7 +147,7 @@ public class StockTaskService extends GcmTaskService {
             updateWidgets();
 
         } else {
-            Utils.sendMessage(getString(R.string.err_fetching_updating_data), getString(R.string.priority_alert_normal), mContext);
+            Utils.sendMessage(mContext.getString(R.string.err_fetching_updating_data), mContext.getString(R.string.priority_alert_normal), mContext);
         }
 
         return result;
@@ -172,7 +172,7 @@ public class StockTaskService extends GcmTaskService {
                 allSymbolEntriesCursor = mContext.getContentResolver().query(symbolUri,
                         new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
                                 QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP}, QuoteColumns.ISCURRENT + "= ?"
-                        , new String[]{"0"}, QuoteColumns._ID + " DESC LIMIT "+getString(R.string.chart_history_limit_count));
+                        , new String[]{"0"}, QuoteColumns._ID + " DESC LIMIT "+mContext.getString(R.string.chart_history_limit_count));
 
                 if (allSymbolEntriesCursor != null && allSymbolEntriesCursor.getCount() != 0) {
                     allSymbolEntriesCursor.moveToLast();
