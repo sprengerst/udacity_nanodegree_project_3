@@ -79,7 +79,7 @@ public class StockDetailFragment extends Fragment {
 
             // fill chart with data
             StringBuilder contentDescriptionChart = new StringBuilder();
-            contentDescriptionChart.append(getActivity().getString(R.string.accessibly_chart_intro)).append(symbol);
+            contentDescriptionChart.append(getActivity().getString(R.string.accessibility_chart_intro)).append(symbol);
 
             float minVal = Float.MAX_VALUE;
             float maxVal = 0;
@@ -90,7 +90,7 @@ public class StockDetailFragment extends Fragment {
             int i = 0;
             for (Map.Entry<String, Float> historicEntry : chartMap.entrySet()) {
 
-                contentDescriptionChart.append(getActivity().getString(R.string.accessiblity_chart_value)).append(historicEntry.getKey()).append(" = ").append(historicEntry.getValue()).append(".");
+                contentDescriptionChart.append(getActivity().getString(R.string.accessibility_chart_value)).append(historicEntry.getKey()).append(" = ").append(historicEntry.getValue()).append(".");
 
                 data.add(new Entry(historicEntry.getValue(), i));
                 labels.add(historicEntry.getKey());

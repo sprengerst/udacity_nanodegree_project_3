@@ -46,10 +46,10 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, final Cursor cursor) {
-        viewHolder.symbol.setContentDescription(mContext.getString(R.string.accessible_stock_symbol)+cursor.getString(cursor.getColumnIndex(QuoteColumns.SYMBOL)));
+        viewHolder.symbol.setContentDescription(mContext.getString(R.string.accessibility_stock_symbol)+cursor.getString(cursor.getColumnIndex(QuoteColumns.SYMBOL)));
         viewHolder.symbol.setText(cursor.getString(cursor.getColumnIndex(QuoteColumns.SYMBOL)));
 
-        viewHolder.bidPrice.setContentDescription(mContext.getString(R.string.accessible_bid_price) + cursor.getString(cursor.getColumnIndex(QuoteColumns.BIDPRICE)));
+        viewHolder.bidPrice.setContentDescription(mContext.getString(R.string.accessibility_bid_price) + cursor.getString(cursor.getColumnIndex(QuoteColumns.BIDPRICE)));
         viewHolder.bidPrice.setText(cursor.getString(cursor.getColumnIndex(QuoteColumns.BIDPRICE)));
 
 
@@ -72,10 +72,10 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
             }
         }
         if (Utils.showPercent) {
-            viewHolder.change.setContentDescription(mContext.getString(R.string.accessible_percentage_change) +cursor.getString(cursor.getColumnIndex(QuoteColumns.PERCENT_CHANGE)));
+            viewHolder.change.setContentDescription(mContext.getString(R.string.accessibility_percentage_change) +cursor.getString(cursor.getColumnIndex(QuoteColumns.PERCENT_CHANGE)));
             viewHolder.change.setText(cursor.getString(cursor.getColumnIndex(QuoteColumns.PERCENT_CHANGE)));
         } else {
-            viewHolder.change.setContentDescription(mContext.getString(R.string.accessible_change)+cursor.getString(cursor.getColumnIndex(QuoteColumns.CHANGE)));
+            viewHolder.change.setContentDescription(mContext.getString(R.string.accessibility_change)+cursor.getString(cursor.getColumnIndex(QuoteColumns.CHANGE)));
             viewHolder.change.setText(cursor.getString(cursor.getColumnIndex(QuoteColumns.CHANGE)));
         }
     }

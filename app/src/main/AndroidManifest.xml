@@ -30,9 +30,8 @@
 
         <activity
             android:name=".ui.StockDetailActivity"
-            android:label="StockChart">
+            android:label="@string/stock_detail_view">
         </activity>
-
 
         <service android:name="com.sam_chordas.android.stockhawk.service.StockTaskService"
             android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE"
@@ -47,13 +46,9 @@
             android:name="com.sam_chordas.android.stockhawk.data.generated.QuoteProvider"
             android:exported="false"/>
 
-
-        <!-- Today Widget -->
-
-
         <receiver
             android:name=".widget.DetailWidgetProvider"
-            android:label="AStockDetailWidget"
+            android:label="@string/widget_label"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
