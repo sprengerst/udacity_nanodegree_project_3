@@ -33,11 +33,11 @@ import java.net.URLEncoder;
  * Modified by Stefan Sprenger
  */
 public class StockTaskService extends GcmTaskService {
-    private String LOG_TAG = StockTaskService.class.getSimpleName();
+    private final String LOG_TAG = StockTaskService.class.getSimpleName();
 
-    private OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client = new OkHttpClient();
     private Context mContext;
-    private StringBuilder mStoredSymbols = new StringBuilder();
+    private final StringBuilder mStoredSymbols = new StringBuilder();
     private boolean isUpdate;
 
     public StockTaskService() {
@@ -48,7 +48,7 @@ public class StockTaskService extends GcmTaskService {
         mContext = context;
     }
 
-    String fetchData(String url) {
+    private String fetchData(String url) {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -164,10 +164,12 @@ public class StockTaskService extends GcmTaskService {
         if (allSymbolsCursor != null && allSymbolsCursor.getCount() != 0) {
             allSymbolsCursor.moveToFirst();
 
+            Cursor allSymbolEntriesCursor = null;
+
             for (int i = 0; i < allSymbolsCursor.getCount(); i++) {
 
                 Uri symbolUri = QuoteProvider.Quotes.withSymbol(allSymbolsCursor.getString(allSymbolsCursor.getColumnIndex(QuoteColumns.SYMBOL)));
-                Cursor allSymbolEntriesCursor = mContext.getContentResolver().query(symbolUri,
+                allSymbolEntriesCursor = mContext.getContentResolver().query(symbolUri,
                         new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
                                 QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP}, QuoteColumns.ISCURRENT + "= ?"
                         , new String[]{"0"}, QuoteColumns._ID + " DESC LIMIT "+getString(R.string.chart_history_limit_count));
@@ -181,6 +183,9 @@ public class StockTaskService extends GcmTaskService {
                 allSymbolsCursor.moveToNext();
 
             }
+
+            if(allSymbolEntriesCursor!= null)allSymbolEntriesCursor.close();
+
             allSymbolsCursor.close();
         }
     }

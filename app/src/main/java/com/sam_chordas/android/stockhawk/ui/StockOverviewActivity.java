@@ -235,7 +235,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         }
     };
 
-    public void forceDataWithMessage(final String message) {
+    private void forceDataWithMessage(final String message) {
         if (!Utils.isConnected(this)) {
             try {
                 AlertDialog.Builder builder =
