@@ -3,7 +3,6 @@ package com.sam_chordas.android.stockhawk.widget;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -20,7 +19,6 @@ import com.sam_chordas.android.stockhawk.data.QuoteProvider;
  */
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class DetailWidgetRemoteViewsService extends RemoteViewsService {
-    public final String LOG_TAG = DetailWidgetRemoteViewsService.class.getSimpleName();
 
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
@@ -37,13 +35,9 @@ public class DetailWidgetRemoteViewsService extends RemoteViewsService {
                 if (data != null) {
                     data.close();
                 }
-                // This method is called by the app hosting the widget (e.g., the launcher)
-                // However, our ContentProvider is not exported so it doesn't have access to the
-                // data. Therefore we need to clear (and finally restore) the calling identity so
-                // that calls use our process and permission
+
                 final long identityToken = Binder.clearCallingIdentity();
 
-                // Fix for endless scrolling widget
                 data = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                         new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
                                 QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP},
@@ -51,8 +45,6 @@ public class DetailWidgetRemoteViewsService extends RemoteViewsService {
                         new String[]{"1"},
                         null);
 
-                System.out.println("DATA COUNT: "+data.getCount());
-                DatabaseUtils.dumpCursor(data);
                 Binder.restoreCallingIdentity(identityToken);
             }
 
@@ -81,7 +73,6 @@ public class DetailWidgetRemoteViewsService extends RemoteViewsService {
                 String symbol = data.getString(data.getColumnIndex("symbol"));
                 String bidPrice = data.getString(data.getColumnIndex("bid_price"));
                 String percentChange = data.getString(data.getColumnIndex("percent_change"));
-//                String change = data.getString(data.getColumnIndex("change"));
 
                 views.setTextViewText(R.id.stock_symbol_widget, symbol);
                 views.setTextViewText(R.id.bid_price_widget, bidPrice);

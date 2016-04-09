@@ -138,14 +138,11 @@ public class Utils {
         Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
     }
 
-
-
     public static boolean isConnected(Context context) {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-
 
 }
