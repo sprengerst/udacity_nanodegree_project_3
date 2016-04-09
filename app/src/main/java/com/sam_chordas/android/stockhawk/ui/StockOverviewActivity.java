@@ -153,7 +153,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         GcmNetworkManager.getInstance(this).schedule(periodicTask);
     }
 
-    private void initService() {
+    public void initService() {
         mServiceIntent.putExtra(getString(R.string.service_state_tag), getString(R.string.service_state_init));
         startService(mServiceIntent);
     }
