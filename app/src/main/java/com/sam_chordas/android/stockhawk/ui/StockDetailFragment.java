@@ -52,7 +52,8 @@ public class StockDetailFragment extends Fragment {
 
             Cursor c = getContext().getContentResolver().query(symbolUri,
                     new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP, QuoteColumns.CREATEDATE}, QuoteColumns.ISCURRENT + "= ?",
+                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP,
+                            QuoteColumns.CREATEDATE},   QuoteColumns.ISCURRENT + "= ?"+ ") GROUP BY (createdate",
                     new String[]{"0"}, QuoteColumns._ID + " ASC");
 
             DatabaseUtils.dumpCursor(c);
