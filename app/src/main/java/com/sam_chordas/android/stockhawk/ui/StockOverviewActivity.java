@@ -61,14 +61,10 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         super.onCreate(savedInstanceState);
         mContext = this;
 
-
         setContentView(R.layout.stock_overview_activity);
-        // The intent service is for executing immediate pulls from the Yahoo API
-        // GCMTaskService can only schedule tasks, they cannot execute immediately
 
         mServiceIntent = new Intent(this, StockIntentService.class);
         if (savedInstanceState == null) {
-            // Run the initialize task service so that some stocks appear upon an empty database
             mServiceIntent.putExtra("tag", "init");
             startService(mServiceIntent);
         }
@@ -91,6 +87,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                         }
                     }
                 }));
+
         recyclerView.setAdapter(mCursorAdapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);

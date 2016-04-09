@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="@dimen/widget_margin"
-    android:background="@color/material_orange_700">
+    android:background="#CC757575"
+>
 
     <FrameLayout
         android:id="@+id/widget"
