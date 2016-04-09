@@ -6,6 +6,6 @@
       android:title="@string/action_change_units"
       android:icon="@drawable/ic_attach_money_white_24dp"
       app:showAsAction="always"
-      android:contentDescription="This is for changing stock changes from percent value to dollar value."/>
+      android:contentDescription="@string/accessibility_change_units"/>
 
 </menu>

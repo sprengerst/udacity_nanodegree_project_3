@@ -13,6 +13,7 @@ import android.util.Log;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
@@ -28,6 +29,8 @@ import java.net.URLEncoder;
  * Created by sam_chordas on 9/30/15.
  * The GCMTask service is primarily for periodic tasks. However, OnRunTask can be called directly
  * and is used for the initialization and adding task as well.
+ *
+ * Modified by Stefan Sprenger
  */
 public class StockTaskService extends GcmTaskService {
     private String LOG_TAG = StockTaskService.class.getSimpleName();
@@ -36,7 +39,6 @@ public class StockTaskService extends GcmTaskService {
     private Context mContext;
     private StringBuilder mStoredSymbols = new StringBuilder();
     private boolean isUpdate;
-
 
     public StockTaskService() {
         super();
@@ -68,14 +70,13 @@ public class StockTaskService extends GcmTaskService {
         StringBuilder urlStringBuilder = new StringBuilder();
         try {
             // Base URL for the Yahoo query
-            urlStringBuilder.append("https://query.yahooapis.com/v1/public/yql?q=");
-            urlStringBuilder.append(URLEncoder.encode("select * from yahoo.finance.quotes where symbol "
-                    + "in (", "UTF-8"));
+            urlStringBuilder.append(getString(R.string.yahoo_api_https));
+            urlStringBuilder.append(URLEncoder.encode(getString(R.string.yahoo_api_select_quotes), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-        if (params.getTag().equals("init") || params.getTag().equals("periodic")) {
+        if (params.getTag().equals(getString(R.string.service_state_init)) || params.getTag().equals(getString(R.string.service_state_periodic))) {
             isUpdate = true;
             initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                     new String[]{"Distinct " + QuoteColumns.SYMBOL}, null,
@@ -83,9 +84,9 @@ public class StockTaskService extends GcmTaskService {
 
             if (initQueryCursor == null || initQueryCursor.getCount() == 0) {
                 if (!Utils.isConnected(mContext)) {
-                    Utils.sendMessage("You have to run this app with internet for the first time", "critical", mContext);
+                    Utils.sendMessage(getString(R.string.err_run_app_with_internet_ft), getString(R.string.priority_alert_critical), mContext);
                 }
-                // Init task. Populates DB with quotes for the symbols seen below
+
                 try {
                     urlStringBuilder.append(
                             URLEncoder.encode("\"YHOO\",\"AAPL\",\"GOOG\",\"MSFT\")", "UTF-8"));
@@ -96,7 +97,7 @@ public class StockTaskService extends GcmTaskService {
                 DatabaseUtils.dumpCursor(initQueryCursor);
                 initQueryCursor.moveToFirst();
                 for (int i = 0; i < initQueryCursor.getCount(); i++) {
-                    mStoredSymbols.append("\"").append(initQueryCursor.getString(initQueryCursor.getColumnIndex("symbol"))).append("\",");
+                    mStoredSymbols.append("\"").append(initQueryCursor.getString(initQueryCursor.getColumnIndex(QuoteColumns.SYMBOL))).append("\",");
                     initQueryCursor.moveToNext();
                 }
 
@@ -108,10 +109,10 @@ public class StockTaskService extends GcmTaskService {
                     e.printStackTrace();
                 }
             }
-        } else if (params.getTag().equals("add")) {
+        } else if (params.getTag().equals(getString(R.string.service_state_add))) {
             isUpdate = false;
             // get symbol from params.getExtra and build query
-            String stockInput = params.getExtras().getString("symbol");
+            String stockInput = params.getExtras().getString(getString(R.string.service_symbol));
             try {
                 urlStringBuilder.append(URLEncoder.encode("\"" + stockInput + "\")", "UTF-8"));
             } catch (UnsupportedEncodingException e) {
@@ -119,7 +120,7 @@ public class StockTaskService extends GcmTaskService {
             }
         }
         // finalize the URL for the API query.
-        urlStringBuilder.append("&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=");
+        urlStringBuilder.append(getString(R.string.yahoo_api_additional_callback));
 
         String urlString;
         String getResponse;
@@ -131,7 +132,6 @@ public class StockTaskService extends GcmTaskService {
             result = GcmNetworkManager.RESULT_SUCCESS;
             try {
                 ContentValues contentValues = new ContentValues();
-                // update ISCURRENT to 0 (false) so new data is current
                 if (isUpdate) {
                     contentValues.put(QuoteColumns.ISCURRENT, 0);
                     mContext.getContentResolver().update(QuoteProvider.Quotes.CONTENT_URI, contentValues,
@@ -147,15 +147,14 @@ public class StockTaskService extends GcmTaskService {
             updateWidgets();
 
         } else {
-            Utils.sendMessage("Problems while fetching/updating data, please check your internet connection", "normal", mContext);
+            Utils.sendMessage(getString(R.string.err_fetching_updating_data), getString(R.string.priority_alert_normal), mContext);
         }
-
 
         return result;
     }
 
+    // deletes the history for all symbols except for amount of specified in the chat_history_limit_count string
     private void clearHistoryAllSymbols() {
-
         Cursor allSymbolsCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                 new String[]{"Distinct " + QuoteColumns.SYMBOL}, null,
                 null, null);
@@ -171,15 +170,10 @@ public class StockTaskService extends GcmTaskService {
                 Cursor allSymbolEntriesCursor = mContext.getContentResolver().query(symbolUri,
                         new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
                                 QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP}, QuoteColumns.ISCURRENT + "= ?"
-                        , new String[]{"0"}, QuoteColumns._ID + " DESC LIMIT 5");
-
-                System.out.println("ENTRIES TO DELETE REFER");
-                DatabaseUtils.dumpCursor(allSymbolEntriesCursor);
+                        , new String[]{"0"}, QuoteColumns._ID + " DESC LIMIT "+getString(R.string.chart_history_limit_count));
 
                 if (allSymbolEntriesCursor != null && allSymbolEntriesCursor.getCount() != 0) {
                     allSymbolEntriesCursor.moveToLast();
-                    System.out.println("SYMBOL DELETE " + symbolUri.getLastPathSegment());
-                    System.out.println("DELETE ALL SMALLER THEN " + allSymbolEntriesCursor.getString(allSymbolEntriesCursor.getColumnIndex(QuoteColumns._ID)));
                     deleteCount += mContext.getContentResolver().delete(symbolUri,
                             QuoteColumns._ID + "< ?",
                             new String[]{allSymbolEntriesCursor.getString(allSymbolEntriesCursor.getColumnIndex(QuoteColumns._ID))});
@@ -187,21 +181,16 @@ public class StockTaskService extends GcmTaskService {
                 allSymbolsCursor.moveToNext();
 
             }
+            allSymbolsCursor.close();
         }
-
     }
-
 
     public static final String ACTION_DATA_UPDATED =
             "com.sam_chordas.android.stockhawk.ACTION_DATA_UPDATED";
 
     private void updateWidgets() {
-        System.out.println("UPDATE WIDGET");
-        // Setting the package ensures that only components in our app will receive the broadcast
         Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED)
                 .setPackage(mContext.getPackageName());
         mContext.sendBroadcast(dataUpdatedIntent);
     }
-
-
 }

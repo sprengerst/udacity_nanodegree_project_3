@@ -38,7 +38,7 @@
             android:gravity="center"
             android:fontFamily="sans-serif-condensed"
             android:textAppearance="?android:textAppearanceLarge"
-            android:text="EMPTY LIST"/>
+            android:text="@string/empty_list"/>
         </FrameLayout>
 
 </LinearLayout>

@@ -12,10 +12,13 @@
     <string name="network_toast">Uh-oh! This app requires an internet connection</string>
     <string name="broadcast_resource_stock">stock-service-listener</string>
     <string name="add_new_stock_entry">Click here to add and search for a Stock Symbol</string>
+
     <string name="accessible_stock_symbol">"Stock Symbol "</string>
     <string name="accessible_bid_price">"Bid Price "</string>
     <string name="accessible_percentage_change">Percentage Change</string>
     <string name="accessible_change">"Change "</string>
+    <string name="accessibility_change_units">This is for changing stock changes from percent value to dollar value.</string>
+
 
     <string name="non_valid_stock_symbol_add">The stock symbol which you tried to enter is not valid</string>
 
@@ -39,19 +42,30 @@
 
     <string name="service_state_init">init</string>
     <string name="service_state_tag">tag</string>
+    <string name="service_state_add">add</string>
+    <string name="service_symbol">symbol</string>
+    <string name="service_state_periodic">periodic</string>
+
     <string name="err_add_only_if_network">Add only allowed if network connection enabled</string>
     <string name="err_add_empty_symbol">You tried to enter an empty stock symbol</string>
     <string name="err_stock_detail_network">Enable internet connection to show stock charts</string>
     <string name="err_stock_duplicate">This stock is already saved!</string>
-    <string name="service_state_add">add</string>
-    <string name="service_symbol">symbol</string>
-    <string name="service_state_periodic">periodic</string>
+
+
     <string name="accessibly_chart_intro">"This chart shows the stock history for the stock symbol "</string>
     <string name="accessiblity_chart_value">"Stock closing value on date "</string>
+
+    <string name="sercvice_add">add</string>
+    <string name="yahoo_api_https">https://query.yahooapis.com/v1/public/yql?q=</string>
+    <string name="yahoo_api_select_quotes">select * from yahoo.finance.quotes where symbol in (</string>
+    <string name="err_run_app_with_internet_ft">You have to run this app with internet if you start for the first time</string>
+    <string name="yahoo_api_additional_callback"><![CDATA[&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=]]></string>
+    <string name="err_fetching_updating_data">Problems while fetching/updating data, please check your internet connection</string>
+    <string name="empty_list">EMPTY LIST</string>
+
+    <string name="chart_history_limit_count">5</string>
     <string name="chart_points_text">Bid Price</string>
     <string name="chart_description">"Overview for Stock: "</string>
     <string name="chart_actual_text">Actual</string>
-    <string name="sercvice_add">add</string>
-
 
 </resources>
