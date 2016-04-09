@@ -45,8 +45,13 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
 
     @Override
     public void onBindViewHolder(final ViewHolder viewHolder, final Cursor cursor) {
+        viewHolder.symbol.setContentDescription("Stock Symbol "+cursor.getString(cursor.getColumnIndex(QuoteColumns.SYMBOL)));
         viewHolder.symbol.setText(cursor.getString(cursor.getColumnIndex(QuoteColumns.SYMBOL)));
+
+        viewHolder.bidPrice.setContentDescription("Bid Price "+cursor.getString(cursor.getColumnIndex(QuoteColumns.BIDPRICE)));
         viewHolder.bidPrice.setText(cursor.getString(cursor.getColumnIndex(QuoteColumns.BIDPRICE)));
+
+
         int sdk = Build.VERSION.SDK_INT;
         if (cursor.getInt(cursor.getColumnIndex("is_up")) == 1) {
             if (sdk < Build.VERSION_CODES.JELLY_BEAN) {
@@ -66,8 +71,10 @@ public class QuoteCursorAdapter extends CursorRecyclerViewAdapter<QuoteCursorAda
             }
         }
         if (Utils.showPercent) {
+            viewHolder.change.setContentDescription("Percentage Change" +cursor.getString(cursor.getColumnIndex("percent_change")));
             viewHolder.change.setText(cursor.getString(cursor.getColumnIndex("percent_change")));
         } else {
+            viewHolder.change.setContentDescription("Change "+cursor.getString(cursor.getColumnIndex("change")));
             viewHolder.change.setText(cursor.getString(cursor.getColumnIndex("change")));
         }
     }

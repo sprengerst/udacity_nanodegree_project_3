@@ -81,7 +81,7 @@ public class StockDetailFragment extends Fragment {
             LineChart mLineChartView = (LineChart) rootView.findViewById(R.id.linechartsstock);
 
             StringBuilder contentDescriptionChart = new StringBuilder();
-            contentDescriptionChart.append("This chart shows the stock history for TODO.");
+            contentDescriptionChart.append("This chart shows the stock history for the stock symbol "+symbol);
 
             float minVal = Float.MAX_VALUE;
             float maxVal = 0;

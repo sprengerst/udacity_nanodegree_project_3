@@ -47,7 +47,7 @@ public class Utils {
                     if (validJSONObject(jsonObject)) {
                         batchOperations.add(buildBatchOperation(jsonObject));
                     } else {
-                        sendMessage("The JSON Object which you tried to enter is not valid", "normal", context);
+                        sendMessage("The stock symbol which you tried to enter is not valid", "normal", context);
                     }
                 } else {
                     resultsArray = jsonObject.getJSONObject("results").getJSONArray("quote");
@@ -59,7 +59,7 @@ public class Utils {
                             if (validJSONObject(jsonObject)) {
                                 batchOperations.add(buildBatchOperation(jsonObject));
                             } else {
-                                sendMessage("The JSON Object which you tried to enter is not valid", "normal", context);
+                                sendMessage("The stock symbol which you tried to enter is not valid", "normal", context);
                             }
                         }
                     }
