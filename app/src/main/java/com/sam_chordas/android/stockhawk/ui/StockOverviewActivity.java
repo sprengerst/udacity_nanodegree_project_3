@@ -137,8 +137,8 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
 
         mTitle = getTitle();
 
-//        long period = 3600L;
-        long period = 3L; // TODO
+        long period = 3600L;
+//        long period = 3L; // debug time
         long flex = 10L;
 
         PeriodicTask periodicTask = new PeriodicTask.Builder()
