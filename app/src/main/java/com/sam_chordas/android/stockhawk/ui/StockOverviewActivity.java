@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -51,11 +52,9 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
      */
     private CharSequence mTitle;
     private Intent mServiceIntent;
-    private ItemTouchHelper mItemTouchHelper;
     private static final int CURSOR_LOADER_ID = 0;
     private QuoteCursorAdapter mCursorAdapter;
     private Context mContext;
-    private Cursor mCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +72,9 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
             mServiceIntent.putExtra("tag", "init");
             startService(mServiceIntent);
         }
+
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        assert recyclerView != null;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         getLoaderManager().initLoader(CURSOR_LOADER_ID, null, this);
 
@@ -93,6 +94,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         recyclerView.setAdapter(mCursorAdapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        assert fab != null;
         fab.attachToRecyclerView(recyclerView);
         fab.setOnClickListener(new View.OnClickListener() {
                                    @Override
@@ -104,13 +106,14 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                                                    .inputType(InputType.TYPE_CLASS_TEXT)
                                                    .input(R.string.input_hint, R.string.input_prefill, new MaterialDialog.InputCallback() {
                                                        @Override
-                                                       public void onInput(MaterialDialog dialog, CharSequence input) {
+                                                       public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
                                                            // On FAB click, receive user input. Make sure the stock doesn't already exist
                                                            // in the DB and proceed accordingly
                                                            if (0 != input.length()) {
                                                                Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                                                                        new String[]{QuoteColumns.SYMBOL}, QuoteColumns.SYMBOL + "= ?",
                                                                        new String[]{input.toString().toUpperCase()}, null);
+                                                               assert c != null;
                                                                if (c.getCount() != 0) {
                                                                    Toast toast =
                                                                            Toast.makeText(StockOverviewActivity.this, "This stock is already saved!",
@@ -124,6 +127,8 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                                                                    mServiceIntent.putExtra("symbol", input.toString().toUpperCase());
                                                                    startService(mServiceIntent);
                                                                }
+
+                                                               c.close();
                                                            } else {
                                                                Utils.showToast("You tried to enter an empty stock symbol", dialog.getContext());
                                                            }
@@ -139,7 +144,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         );
 
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mCursorAdapter);
-        mItemTouchHelper = new ItemTouchHelper(callback);
+        ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(callback);
 
         mItemTouchHelper.attachToRecyclerView(recyclerView);
 
@@ -154,7 +159,8 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
         // is so Widget data stays up to date.
         PeriodicTask periodicTask = new PeriodicTask.Builder()
                 .setService(StockTaskService.class)
-                .setPeriod(3)
+                .setPeriod(period)
+                .setFlex(flex)
                 .setTag(periodicTag)
                 .setRequiredNetwork(Task.NETWORK_STATE_CONNECTED)
                 .setRequiresCharging(false)
@@ -177,6 +183,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
 
     public void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
+        assert actionBar != null;
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
@@ -219,7 +226,6 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
-        mCursor = data;
     }
 
     @Override
@@ -238,22 +244,21 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "custom-event-name" is broadcasted.
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("message");
             String state = intent.getStringExtra("state");
 
             if (state.equals("critical")) {
-                getDATA(message);
+                forceDataWithMessage(message);
             } else {
                 Utils.showToast(message, context);
             }
         }
     };
 
-
-    public void getDATA(final String message) {
+    public void forceDataWithMessage(final String message) {
         if (!Utils.isConnected(this)) {
             try {
                 AlertDialog.Builder builder =
@@ -263,7 +268,7 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                 builder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        getDATA(message);
+                        forceDataWithMessage(message);
                     }
                 });
                 builder.setCancelable(false);
@@ -272,18 +277,8 @@ public class StockOverviewActivity extends AppCompatActivity implements LoaderMa
                 e.printStackTrace();
             }
         } else {
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        //Wait to connect (for wifi)
-                        Thread.sleep(1000);
-                        mServiceIntent.putExtra("tag", "init");
-                        startService(mServiceIntent);
-                    } catch (Exception e) {
-                    }
-                }
-            }.start();
+            mServiceIntent.putExtra("tag", "init");
+            startService(mServiceIntent);
         }
     }
 

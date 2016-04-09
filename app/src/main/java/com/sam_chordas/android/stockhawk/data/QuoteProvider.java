@@ -8,6 +8,7 @@ import net.simonvt.schematic.annotation.TableEndpoint;
 
 /**
  * Created by sam_chordas on 10/5/15.
+ *
  */
 @ContentProvider(authority = QuoteProvider.AUTHORITY, database = QuoteDatabase.class)
 public class QuoteProvider {

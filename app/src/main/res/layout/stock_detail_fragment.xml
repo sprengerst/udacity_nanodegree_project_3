@@ -7,9 +7,9 @@
     android:layout_height="fill_parent"
     android:fadeScrollbars="false">
 
-    <com.db.chart.view.LineChartView
-        android:id="@+id/linechartstock"
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/linechartsstock"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:layout_margin="15dp"/>
+        android:layout_height="match_parent"
+        android:layout_marginTop="30dp" />
 </FrameLayout>
