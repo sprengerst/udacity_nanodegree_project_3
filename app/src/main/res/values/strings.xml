@@ -51,6 +51,7 @@
     <string name="chart_points_text">Bid Price</string>
     <string name="chart_description">"Overview for Stock: "</string>
     <string name="chart_actual_text">Actual</string>
+    <string name="sercvice_add">add</string>
 
 
 </resources>

@@ -25,7 +25,7 @@ public class StockDetailActivity extends AppCompatActivity {
             fragment.setArguments(arguments);
 
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.movie_detail_container, fragment)
+                    .add(R.id.stock_detail_container, fragment)
                     .commit();
         }
     }
