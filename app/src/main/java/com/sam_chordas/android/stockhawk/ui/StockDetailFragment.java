@@ -51,19 +51,26 @@ public class StockDetailFragment extends Fragment {
             Cursor c = getContext().getContentResolver().query(symbolUri,
                     new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
                             QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP}, QuoteColumns.ISCURRENT + "= ?",
-                    new String[]{"0"}, QuoteColumns._ID + " DESC");
+                    new String[]{"0"}, QuoteColumns._ID + " ASC");
 
             System.out.println("HISTORY ENTRIES");
             DatabaseUtils.dumpCursor(c);
 
-            int historyCount = 1;
+            int cursorEntries = c.getCount();
 
-            while (c.moveToNext() && historyCount < 10) {
+            while(cursorEntries>9){
+                c.moveToNext();
+                // TODO delete other entries
+                cursorEntries--;
+            }
+
+
+            while (c.moveToNext() && cursorEntries > 0) {
                 System.out.println("USED ENTRY: "+c.getString(c.getColumnIndex(QuoteColumns._ID)));
                 System.out.println("USED SYMBOL: "+c.getString(c.getColumnIndex(QuoteColumns.SYMBOL)));
                 float bidPrice = Float.parseFloat(c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE)).replace(",", "."));
-                chartMap.put("-" + historyCount, bidPrice);
-                historyCount++;
+                chartMap.put("-" + cursorEntries+"h"+ "E"+c.getString(c.getColumnIndex(QuoteColumns._ID)), bidPrice);
+                cursorEntries--;
             }
 
 
@@ -74,7 +81,7 @@ public class StockDetailFragment extends Fragment {
 
             cursorActual.moveToFirst();
 
-            chartMap.put("0", Float.parseFloat(cursorActual.getString(cursorActual.getColumnIndex(QuoteColumns.BIDPRICE)).replace(",", ".")));
+            chartMap.put("Actual", Float.parseFloat(cursorActual.getString(cursorActual.getColumnIndex(QuoteColumns.BIDPRICE)).replace(",", ".")));
         }
 
         View rootView = inflater.inflate(R.layout.stock_detail_fragment, container, false);
@@ -89,6 +96,7 @@ public class StockDetailFragment extends Fragment {
         LineSet dataset = new LineSet();
 
         // FIXME look which side
+
         for (Map.Entry<String, Float> historicEntry : chartMap.entrySet()) {
 
             contentDescriptionChart.append("Stock closing value on date " + historicEntry.getKey() + " is " + historicEntry.getValue() + ".");
