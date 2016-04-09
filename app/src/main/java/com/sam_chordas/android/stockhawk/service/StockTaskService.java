@@ -173,17 +173,19 @@ public class StockTaskService extends GcmTaskService {
                                 QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP}, QuoteColumns.ISCURRENT + "= ?"
                         , new String[]{"0"}, QuoteColumns._ID + " DESC LIMIT 5");
 
-//                System.out.println("ENTRIES TO DELETE REFER");
-//                DatabaseUtils.dumpCursor(allSymbolEntriesCursor);
+                System.out.println("ENTRIES TO DELETE REFER");
+                DatabaseUtils.dumpCursor(allSymbolEntriesCursor);
 
-                allSymbolEntriesCursor.moveToLast();
-
-                System.out.println("SYMBOL DELETE "+symbolUri.getLastPathSegment());
-                System.out.println("DELETE ALL SMALLER THEN "+allSymbolEntriesCursor.getString(allSymbolEntriesCursor.getColumnIndex(QuoteColumns._ID)));
-                deleteCount += mContext.getContentResolver().delete(symbolUri,
-                        QuoteColumns._ID + "< ?",
-                        new String[]{allSymbolEntriesCursor.getString(allSymbolEntriesCursor.getColumnIndex(QuoteColumns._ID))});
+                if (allSymbolEntriesCursor != null && allSymbolEntriesCursor.getCount() != 0) {
+                    allSymbolEntriesCursor.moveToLast();
+                    System.out.println("SYMBOL DELETE " + symbolUri.getLastPathSegment());
+                    System.out.println("DELETE ALL SMALLER THEN " + allSymbolEntriesCursor.getString(allSymbolEntriesCursor.getColumnIndex(QuoteColumns._ID)));
+                    deleteCount += mContext.getContentResolver().delete(symbolUri,
+                            QuoteColumns._ID + "< ?",
+                            new String[]{allSymbolEntriesCursor.getString(allSymbolEntriesCursor.getColumnIndex(QuoteColumns._ID))});
+                }
                 allSymbolsCursor.moveToNext();
+
             }
         }
 
