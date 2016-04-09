@@ -46,6 +46,11 @@
     <string name="service_state_add">add</string>
     <string name="service_symbol">symbol</string>
     <string name="service_state_periodic">periodic</string>
+    <string name="accessibly_chart_intro">"This chart shows the stock history for the stock symbol "</string>
+    <string name="accessiblity_chart_value">"Stock closing value on date "</string>
+    <string name="chart_points_text">Bid Price</string>
+    <string name="chart_description">"Overview for Stock: "</string>
+    <string name="chart_actual_text">Actual</string>
 
 
 </resources>
