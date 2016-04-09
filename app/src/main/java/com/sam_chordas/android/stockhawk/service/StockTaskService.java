@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -37,7 +38,7 @@ public class StockTaskService extends GcmTaskService {
     private boolean isUpdate;
 
 
-    public StockTaskService(){
+    public StockTaskService() {
         super();
     }
 
@@ -79,6 +80,7 @@ public class StockTaskService extends GcmTaskService {
             initQueryCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                     new String[]{"Distinct " + QuoteColumns.SYMBOL}, null,
                     null, null);
+
             if (initQueryCursor == null || initQueryCursor.getCount() == 0) {
                 if (!Utils.isConnected(mContext)) {
                     Utils.sendMessage("You have to run this app with internet for the first time", "critical", mContext);
@@ -136,19 +138,55 @@ public class StockTaskService extends GcmTaskService {
                             null, null);
                 }
                 mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY, Utils.quoteJsonToContentVals(getResponse, mContext));
+                clearHistoryAllSymbols();
 
             } catch (RemoteException | OperationApplicationException e) {
                 Log.e(LOG_TAG, "Error applying batch insert", e);
             }
 
             updateWidgets();
+
         } else {
             Utils.sendMessage("Problems while fetching/updating data, please check your internet connection", "normal", mContext);
         }
 
 
-
         return result;
+    }
+
+    private void clearHistoryAllSymbols() {
+
+        Cursor allSymbolsCursor = mContext.getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
+                new String[]{"Distinct " + QuoteColumns.SYMBOL}, null,
+                null, null);
+
+        int deleteCount = 0;
+
+        if (allSymbolsCursor != null && allSymbolsCursor.getCount() != 0) {
+            allSymbolsCursor.moveToFirst();
+
+            for (int i = 0; i < allSymbolsCursor.getCount(); i++) {
+
+                Uri symbolUri = QuoteProvider.Quotes.withSymbol(allSymbolsCursor.getString(allSymbolsCursor.getColumnIndex(QuoteColumns.SYMBOL)));
+                Cursor allSymbolEntriesCursor = mContext.getContentResolver().query(symbolUri,
+                        new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
+                                QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP}, QuoteColumns.ISCURRENT + "= ?"
+                        , new String[]{"0"}, QuoteColumns._ID + " DESC LIMIT 5");
+
+//                System.out.println("ENTRIES TO DELETE REFER");
+//                DatabaseUtils.dumpCursor(allSymbolEntriesCursor);
+
+                allSymbolEntriesCursor.moveToLast();
+
+                System.out.println("SYMBOL DELETE "+symbolUri.getLastPathSegment());
+                System.out.println("DELETE ALL SMALLER THEN "+allSymbolEntriesCursor.getString(allSymbolEntriesCursor.getColumnIndex(QuoteColumns._ID)));
+                deleteCount += mContext.getContentResolver().delete(symbolUri,
+                        QuoteColumns._ID + "< ?",
+                        new String[]{allSymbolEntriesCursor.getString(allSymbolEntriesCursor.getColumnIndex(QuoteColumns._ID))});
+                allSymbolsCursor.moveToNext();
+            }
+        }
+
     }
 
 

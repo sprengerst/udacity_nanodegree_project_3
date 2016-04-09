@@ -55,26 +55,16 @@ public class StockDetailFragment extends Fragment {
                             QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP, QuoteColumns.CREATEDATE}, QuoteColumns.ISCURRENT + "= ?",
                     new String[]{"0"}, QuoteColumns._ID + " ASC");
 
-
             DatabaseUtils.dumpCursor(c);
 
-            int cursorEntries = c.getCount();
 
-            while (cursorEntries > 4) {
-                c.moveToNext();
-                // TODO delete deprecated entries from database
-                cursorEntries--;
-            }
-
-
-            while (c.moveToNext() && cursorEntries > 0) {
+            while (c.moveToNext()) {
                 System.out.println("USED ENTRY: " + c.getString(c.getColumnIndex(QuoteColumns._ID)));
                 System.out.println("USED SYMBOL: " + c.getString(c.getColumnIndex(QuoteColumns.SYMBOL)));
                 float bidPrice = Float.parseFloat(c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE)).replace(",", "."));
                 String createdDate = c.getString(c.getColumnIndex(QuoteColumns.CREATEDATE));
                 System.out.println("CREATEDATE:" + createdDate);
                 chartMap.put(createdDate, bidPrice);
-                cursorEntries--;
             }
 
 
@@ -96,8 +86,8 @@ public class StockDetailFragment extends Fragment {
             float maxVal = 0;
 
 
-            List<Entry> data = new ArrayList<Entry>();
-            List<String> labels = new ArrayList<String>();
+            List<Entry> data = new ArrayList<>();
+            List<String> labels = new ArrayList<>();
 
             int i = 0;
             for (Map.Entry<String, Float> historicEntry : chartMap.entrySet()) {
@@ -137,32 +127,14 @@ public class StockDetailFragment extends Fragment {
 
             mLineChartView.getAxisLeft().setTextColor(Color.WHITE);
             mLineChartView.getAxisRight().setTextColor(Color.WHITE);
-
-
             mLineChartView.setData(combinedLineData);
             mLineChartView.setDescription("Overview for Stock: " + symbol);
             mLineChartView.setDescriptionColor(Color.WHITE);
-
             mLineChartView.setBorderColor(Color.WHITE);
 
-//        dataset.setColor(Color.YELLOW);
-//        dataset.setDotsColor(Color.RED);
-//
-//        mLineChartView.dismiss();
-//        mLineChartView.addData(dataset);
-//        mLineChartView.setAxisBorderValues((int) minVal - 2, (int) maxVal + 2);
-//        mLineChartView.setAxisColor(Color.WHITE);
-//        mLineChartView.setLabelsColor(Color.WHITE);
-//
-//        if(maxVal-minVal>0) {
-//            mLineChartView.setStep((int) Math.ceil(maxVal - minVal));
-//        }else{
-//            mLineChartView.setStep(1);
-//        }
-//        mLineChartView.setGrid(ChartView.GridType.FULL, new Paint(Color.WHITE));
-//        mLineChartView.show();
-
             mLineChartView.setContentDescription(contentDescriptionChart.toString());
+
+
 
         }
 
