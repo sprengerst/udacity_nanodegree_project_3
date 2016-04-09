@@ -50,7 +50,7 @@ public class StockDetailFragment extends Fragment {
 
             Cursor c = getContext().getContentResolver().query(symbolUri,
                     new String[]{QuoteColumns._ID, QuoteColumns.SYMBOL, QuoteColumns.BIDPRICE,
-                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP}, QuoteColumns.ISCURRENT + "= ?",
+                            QuoteColumns.PERCENT_CHANGE, QuoteColumns.CHANGE, QuoteColumns.ISUP,QuoteColumns.CREATEDATE}, QuoteColumns.ISCURRENT + "= ?",
                     new String[]{"0"}, QuoteColumns._ID + " ASC");
 
             System.out.println("HISTORY ENTRIES");
@@ -58,9 +58,9 @@ public class StockDetailFragment extends Fragment {
 
             int cursorEntries = c.getCount();
 
-            while(cursorEntries>9){
+            while(cursorEntries>3){
                 c.moveToNext();
-                // TODO delete other entries
+                // TODO delete deprecated entries from database
                 cursorEntries--;
             }
 
@@ -69,7 +69,9 @@ public class StockDetailFragment extends Fragment {
                 System.out.println("USED ENTRY: "+c.getString(c.getColumnIndex(QuoteColumns._ID)));
                 System.out.println("USED SYMBOL: "+c.getString(c.getColumnIndex(QuoteColumns.SYMBOL)));
                 float bidPrice = Float.parseFloat(c.getString(c.getColumnIndex(QuoteColumns.BIDPRICE)).replace(",", "."));
-                chartMap.put("-" + cursorEntries+"h"+ "E"+c.getString(c.getColumnIndex(QuoteColumns._ID)), bidPrice);
+                String createdDate = c.getString(c.getColumnIndex(QuoteColumns.CREATEDATE));
+                System.out.println("CREATEDATE:"+createdDate);
+                chartMap.put(createdDate, bidPrice);
                 cursorEntries--;
             }
 
@@ -95,8 +97,6 @@ public class StockDetailFragment extends Fragment {
 
         LineSet dataset = new LineSet();
 
-        // FIXME look which side
-
         for (Map.Entry<String, Float> historicEntry : chartMap.entrySet()) {
 
             contentDescriptionChart.append("Stock closing value on date " + historicEntry.getKey() + " is " + historicEntry.getValue() + ".");
@@ -111,7 +111,9 @@ public class StockDetailFragment extends Fragment {
                 minVal = historicEntry.getValue();
             }
         }
+
         dataset.setColor(Color.YELLOW);
+        dataset.setDotsColor(Color.RED);
 
         mLineChartView.dismiss();
         mLineChartView.addData(dataset);
@@ -126,7 +128,6 @@ public class StockDetailFragment extends Fragment {
         }
         mLineChartView.setGrid(ChartView.GridType.FULL, new Paint(Color.WHITE));
         mLineChartView.show();
-
 
         mLineChartView.setContentDescription(contentDescriptionChart.toString());
 

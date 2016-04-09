@@ -17,7 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,7 +34,7 @@ public class Utils {
         ArrayList<ContentProviderOperation> batchOperations = new ArrayList<>();
         JSONObject jsonObject = null;
         JSONArray resultsArray = null;
-        System.out.println("JSON : "+JSON.replaceAll("\",","\n\","));
+        System.out.println("JSON : " + JSON.replaceAll("\",", "\n\","));
         try {
             jsonObject = new JSONObject(JSON);
             if (jsonObject != null && jsonObject.length() != 0) {
@@ -45,10 +44,10 @@ public class Utils {
                     jsonObject = jsonObject.getJSONObject("results")
                             .getJSONObject("quote");
 
-                    if(validJSONObject(jsonObject)) {
+                    if (validJSONObject(jsonObject)) {
                         batchOperations.add(buildBatchOperation(jsonObject));
-                    }else{
-                        sendMessage("The JSON Object which you tried to enter is not valid","normal",context);
+                    } else {
+                        sendMessage("The JSON Object which you tried to enter is not valid", "normal", context);
                     }
                 } else {
                     resultsArray = jsonObject.getJSONObject("results").getJSONArray("quote");
@@ -57,10 +56,10 @@ public class Utils {
                         for (int i = 0; i < resultsArray.length(); i++) {
                             jsonObject = resultsArray.getJSONObject(i);
 
-                            if(validJSONObject(jsonObject)) {
+                            if (validJSONObject(jsonObject)) {
                                 batchOperations.add(buildBatchOperation(jsonObject));
-                            }else{
-                                sendMessage("The JSON Object which you tried to enter is not valid","normal",context);
+                            } else {
+                                sendMessage("The JSON Object which you tried to enter is not valid", "normal", context);
                             }
                         }
                     }
@@ -72,18 +71,18 @@ public class Utils {
         return batchOperations;
     }
 
-    public static void sendMessage(String errorMessage,String state, Context context) {
+    public static void sendMessage(String errorMessage, String state, Context context) {
         Intent intent = new Intent(context.getString(R.string.broadcast_resource_stock));
         intent.putExtra("message", errorMessage);
         intent.putExtra("state", state);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
-    private static boolean validJSONObject(JSONObject jsonObject) throws JSONException{
+    private static boolean validJSONObject(JSONObject jsonObject) throws JSONException {
         return !("null").equals(jsonObject.getString("Bid")) && !("null").equals(jsonObject.getString("ChangeinPercent"));
     }
 
-    public static String truncateBidPrice(String bidPrice) throws Exception{
+    public static String truncateBidPrice(String bidPrice) throws Exception {
         bidPrice = String.format("%.2f", Float.parseFloat(bidPrice));
         return bidPrice;
     }
@@ -116,6 +115,7 @@ public class Utils {
             builder.withValue(QuoteColumns.PERCENT_CHANGE, truncateChange(
                     jsonObject.getString("ChangeinPercent"), true));
             builder.withValue(QuoteColumns.CHANGE, truncateChange(change, false));
+            builder.withValue(QuoteColumns.CREATEDATE, getCurrentDateFormat());
             builder.withValue(QuoteColumns.ISCURRENT, 1);
             if (change.charAt(0) == '-') {
                 builder.withValue(QuoteColumns.ISUP, 0);
@@ -129,27 +129,15 @@ public class Utils {
         return builder.build();
     }
 
+    private static String getCurrentDateFormat() {
+        SimpleDateFormat outputYahooFormat = new SimpleDateFormat("dd/M hh:mm a");
+        return outputYahooFormat.format(new Date());
+    }
+
     public static void showToast(String toastText, Context context) {
         Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
     }
 
-    public static Date parseDateFormat(String date) throws ParseException {
-        return new SimpleDateFormat("yyyy-MM-dd").parse(date);
-    }
-
-    public static String addDays(Date d, int days) {
-        return getDateString(new Date(d.getTime() + (long) days * 1000 * 60 * 60 * 24));
-    }
-
-    public static String getDateString(Date d) {
-        SimpleDateFormat yahooDate = new SimpleDateFormat("yyyy-MM-dd");
-        return yahooDate.format(d);
-    }
-
-
-    public static String chartFormat(String closeDate) throws ParseException {
-        return new SimpleDateFormat("MM-dd").format(parseDateFormat(closeDate));
-    }
 
 
     public static boolean isConnected(Context context) {

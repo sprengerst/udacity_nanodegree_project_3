@@ -18,6 +18,8 @@ public class QuoteColumns {
   @DataType(DataType.Type.TEXT) @NotNull
   public static final String CHANGE = "change";
   @DataType(DataType.Type.TEXT) @NotNull
+  public static final String CREATEDATE = "createdate";
+  @DataType(DataType.Type.TEXT) @NotNull
   public static final String BIDPRICE = "bid_price";
   @DataType(DataType.Type.TEXT)
   public static final String CREATED = "created";
