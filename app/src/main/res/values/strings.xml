@@ -12,4 +12,8 @@
   <string name="network_toast">Uh-oh! This app requires an internet connection</string>
   <string name="broadcast_resource_stock">stock-service-listener</string>
   <string name="add_new_stock_entry">Click here to add and search for a Stock Symbol</string>
+  <string name="accessible_stock_symbol">"Stock Symbol "</string>
+  <string name="accessible_bid_price">"Bid Price "</string>
+  <string name="accessible_percentage_change">Percentage Change</string>
+  <string name="accessible_change">"Change "</string>
 </resources>
